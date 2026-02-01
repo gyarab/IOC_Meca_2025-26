@@ -12,9 +12,11 @@ import Chess.Chesswindowpanel;
  */
 public class Pawn extends Pieces{
     
-    public Pawn(int color, int col, int row) {
-        super(color, col, row);
-        
+    public boolean hasMoved = false;
+    
+    public Pawn(int color, int col, int row, final boolean isFirstMove) {
+        super(color, col, row, true);
+            
         type = Types.PAWN;
         
         if(color == Chesswindowpanel.WHITE){
@@ -29,6 +31,7 @@ public class Pawn extends Pieces{
         if(isWithinBoard(targetCol, targetRow) && isSameSquare(targetCol, targetRow) == false){
             //Define the move value based on its color
             int moveValue;
+            if(hasMoved == false){
             if(color == Chesswindowpanel.WHITE){
                 moveValue = -1; //for white pawn(up)
             }
@@ -43,11 +46,17 @@ public class Pawn extends Pieces{
             return true;
         }
         //2 square movement
-        if(targetCol == pceCol && targetRow == pceRow + moveValue*2 && hittingP == null && hasmoved == false){
+        if(!hasMoved && targetCol == pceCol && targetRow == pceRow + moveValue*2 && hittingP == null){
                 if (pieceIsOnStraightLine(targetCol, targetRow) == false) {
                     return true;
                 }
         }
+        //1 square movement when the pawn has moved
+        if(targetCol == pceCol && row == pceRow + moveValue && hittingP == null){
+            return true;
+        }
+        
+        
         //Diagonal movement & Capture(if a piece is on a square diagonally in front of it)
         if(Math.abs(targetCol-pceCol) == 1 
                 && targetRow == pceRow + moveValue && hittingP != null && hittingP.color != color){
@@ -62,6 +71,7 @@ public class Pawn extends Pieces{
                 }
             }
         }
+        }   
         }
         return false;
 }    

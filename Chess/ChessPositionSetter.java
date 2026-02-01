@@ -172,10 +172,9 @@ public class ChessPositionSetter extends JDialog {
         
     // ===== Pawn position validation =====
         if (selectedType == Types.PAWN) {
-            if ((selectedColor == Chesswindowpanel.WHITE && row == 0) ||
-                (selectedColor == Chesswindowpanel.BLACK && row == 7)) {
+            if(row == 0 || row == 7){
                 JOptionPane.showMessageDialog(this,
-                "This is not a valid position!");
+                "Pawn can be placed only on 2nd–7th rank!");
                 return;
             }
         }
@@ -190,14 +189,24 @@ public class ChessPositionSetter extends JDialog {
             return;
         }
 
-        if (selectedType == Types.KNIGHT && knightCount.get(selectedColor) >= 10) {
-            JOptionPane.showMessageDialog(this, "Each side can have at most 10 knights!");
-            return;
+        if (selectedType == Types.KNIGHT){
+            int pawns = pawnCount.get(selectedColor);
+            int maxKnights = (pawns == 8) ? 2 : 10;
+                
+            if(knightCount.get(selectedColor) >= maxKnights){
+                JOptionPane.showMessageDialog(this,"Not enough promoted pawns for more knights!");
+                return;
+            }    
         }
         
-        if (selectedType == Types.BISHOP && bishopCount.get(selectedColor) >= 10) {
-            JOptionPane.showMessageDialog(this, "Each side can have at most 10 bishops!");
-            return;
+        if (selectedType == Types.BISHOP){
+                int pawns = pawnCount.get(selectedColor);
+                int maxBishops = (pawns == 8) ? 2 : 10;
+                
+                if(bishopCount.get(selectedColor) >= maxBishops){
+                    JOptionPane.showMessageDialog(this,"Not enough promoted pawns for more bishops");
+                    return;
+                }   
         }
         
         if (selectedType == Types.QUEEN && queenCount.get(selectedColor) >= 9) {
@@ -226,12 +235,12 @@ public class ChessPositionSetter extends JDialog {
 
         Pieces p;
         switch (selectedType) {
-            case KING:   p = new King(selectedColor, col, row); break;
-            case QUEEN:  p = new Queen(selectedColor, col, row); break;
-            case ROOK:   p = new Rook(selectedColor, col, row); break;
-            case BISHOP: p = new Bishop(selectedColor, col, row); break;
-            case KNIGHT: p = new Knight(selectedColor, col, row); break;
-            default:     p = new Pawn(selectedColor, col, row);
+            case KING:   p = new King(selectedColor, col, row, false); break;
+            case QUEEN:  p = new Queen(selectedColor, col, row, false); break;
+            case ROOK:   p = new Rook(selectedColor, col, row, false); break;
+            case BISHOP: p = new Bishop(selectedColor, col, row, false); break;
+            case KNIGHT: p = new Knight(selectedColor, col, row, false); break;
+            default:     p = new Pawn(selectedColor, col, row, false);
         }
 
         if (selectedType == Types.KING)
@@ -288,6 +297,30 @@ public class ChessPositionSetter extends JDialog {
         b.setText("");
         b.putClientProperty("piece", null);
     }
+    
+    private boolean isKingInCheckInPosition(int kingColor) {
+    Pieces king = null;
+
+    for (Pieces p : resultPieces) {
+        if (p.type == Types.KING && p.color == kingColor) {
+            king = p;
+            break;
+        }
+    }
+
+    if (king == null) return true; // safe
+
+    for (Pieces p : resultPieces) {
+        if (p.color != kingColor) {
+            if (p.canMove(king.col, king.row)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+    
 
     private String getSymbol() {
         switch (selectedType) {
@@ -310,16 +343,16 @@ public class ChessPositionSetter extends JDialog {
             return;
         }
 
-        if (!parent.isValidPosition(
-            resultPieces,
-            turnColor,
-            whiteCastleK, whiteCastleQ,
-            blackCastleK, blackCastleQ)) {
-
-            JOptionPane.showMessageDialog(this,
-            "This is not a valid position!");
-        return;
-        }
+//            if (!parent.isValidPosition(
+//            resultPieces,
+//            turnColor,
+//            whiteCastleK, whiteCastleQ,
+//            blackCastleK, blackCastleQ)) {
+//
+//            JOptionPane.showMessageDialog(this,
+//            "This is not a valid position!");
+//        return;
+       // }
 
         parent.pieces.clear();
         parent.simPieces.clear();
@@ -337,11 +370,13 @@ public class ChessPositionSetter extends JDialog {
         ? Chesswindowpanel.BLACK
         : Chesswindowpanel.WHITE;
 
-        if (parent.isKingInCheck(sideNotToMove)) {
+       if(isKingInCheckInPosition(Chesswindowpanel.WHITE) ||
+               isKingInCheckInPosition(Chesswindowpanel.BLACK)){
+        
         JOptionPane.showMessageDialog(this,
-        "This is not a valid position!");
-        return;
-}
+        "King cannot be in check in a valid position!");
+        return;      
+        }
         
         dispose();
         parent.repaint();

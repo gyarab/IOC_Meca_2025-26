@@ -6,7 +6,6 @@
 package Chess.Pieces.piece;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
-import Chess.Pieces.piece.Types;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -26,7 +25,9 @@ public class Pieces {
     public Pieces hittingP;
     public Pieces activeP;
     public boolean hasmoved, twoStepped;    
-    public Pieces(int color,int col,int row){
+    private final boolean isFirstMove;
+    
+    public Pieces(int color,int col,int row, final boolean isFirstMove){
         this.color = color;
         this.col = col;
         this.row = row;
@@ -34,6 +35,7 @@ public class Pieces {
         y = getY(row);
         this.pceCol = col;
         this.pceRow = row;
+        this.isFirstMove = isFirstMove;
     }
     public BufferedImage getImage(String imagePath){
         BufferedImage image = null;

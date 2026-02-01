@@ -1,111 +1,98 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Chess;
-/**
- *
- * @author Admin
- */
-// Source - https://stackoverflow.com/q
-// Posted by David weng, modified by community. See post 'Timeline' for change history
-// Retrieved 2025-12-31, License - CC BY-SA 4.0
+
+import Chess.Pieces.piece.Pieces;
+import java.util.ArrayList;
+
 
 public class MiniMax implements MoveStrategy {
 
     private final BoardEvaluator boardEvaluator;
     private int searchDepth;
-
+    private long numBoardsEvaluated = 0;
 
     public MiniMax(BoardEvaluator boardEvaluator, int searchDepth) {
         this.boardEvaluator = boardEvaluator;
         this.searchDepth = searchDepth;
     }
 
+    // Spustí Minimax a vrátí nejlepší tah
+    public Chessboard.Move execute(Chessboard board, int color) {
+        long startTime = System.currentTimeMillis();
+        Chessboard.Move bestMove = null;
+        int bestValue = (color == Chesswindowpanel.WHITE) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        ArrayList<Chessboard.Move> moves = board.getLegalMoves(color);
+
+        for (Chessboard.Move move : moves) {
+            board.movePiece(move);                 // simulace tahu
+            int currentValue = minimax(board, searchDepth - 1, color == Chesswindowpanel.BLACK);
+            board.undoMove();                      // vrácení tahu
+
+            if (color == Chesswindowpanel.WHITE) { // Maximalizace
+                if (currentValue > bestValue) {
+                    bestValue = currentValue;
+                    bestMove = move;
+                }
+            } else { // Minimalizace pro černého
+                if (currentValue < bestValue) {
+                    bestValue = currentValue;
+                    bestMove = move;
+                }
+            }
+        }
+
+        long elapsed = System.currentTimeMillis() - startTime;
+        System.out.println("MiniMax calculation time: " + elapsed + "ms, bestValue=" + bestValue);
+        return bestMove;
+    }
+
+    // Rekurzivní Minimax
+    private int minimax(Chessboard board, int depth, boolean isMaximizingPlayer) {
+        numBoardsEvaluated++;
+
+        if (depth == 0) {
+            // Hodnota pozice z pohledu bílého
+            int eval = boardEvaluator.evaluate(board, Chesswindowpanel.WHITE);
+            return isMaximizingPlayer ? eval : -eval;
+        }
+
+        int currentColor = isMaximizingPlayer ? Chesswindowpanel.WHITE : Chesswindowpanel.BLACK;
+        ArrayList<Chessboard.Move> moves = board.getLegalMoves(currentColor);
+
+        if (moves.isEmpty()) { 
+            // Pat nebo mat
+            return board.isKingInCheck(currentColor) ? (isMaximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE) : 0;
+        }
+
+        int bestValue = isMaximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        for (Chessboard.Move move : moves) {
+            board.movePiece(move);
+            int value = minimax(board, depth - 1, !isMaximizingPlayer);
+            board.undoMove();
+            if (isMaximizingPlayer) {
+                bestValue = Math.max(bestValue, value);
+            } else {
+                bestValue = Math.min(bestValue, value);
+            }
+        }
+        return bestValue;
+    }
+
     @Override
     public String toString() {
-        return "MiniMax{" +
-                "boardEvaluator=" + boardEvaluator +
-                '}';
+        return "MiniMax{depth=" + searchDepth + "}";
     }
 
     @Override
-    public Move execute(ChessGame game) {
-
-        long startTime = System.currentTimeMillis();
-
-        Move calculatedBestMove = null;
-
-        int highestSeenValue = Integer.MIN_VALUE;
-        int lowestSeenValue = Integer.MAX_VALUE;
-        int currentValue;
-
-        System.out.println("computer thinks" + " depth= " + this.searchDepth);
-
-        var numberOfAllMoves = game.getBoard().getAllAvailableMoves(PieceColor.BLACK);
-
-        for(Move move : game.getBoard().getAllAvailableMoves(PieceColor.BLACK)){
-             game.getBoard().movePiece(move.getSelectedPiece(), move);
-             currentValue = calculateValue(game);
-             if(game.getCurrentTurn() == game.getPlayers().get(0) && currentValue >= highestSeenValue)
-             {
-                 highestSeenValue = currentValue;
-                 calculatedBestMove = move;
-             }
-             else if(game.getCurrentTurn() == game.getPlayers().get(1) && currentValue <= lowestSeenValue){
-                 lowestSeenValue = currentValue;
-                 calculatedBestMove = move;
-             }
-
-        }
-        long CalculationTime = System.currentTimeMillis() - startTime;
-        return  calculatedBestMove;
+    public long getNumBoardsEvaluated() {
+        return numBoardsEvaluated;
     }
 
-    public int calculateValue(ChessGame game){
-        if(game.getCurrentTurn() == game.getPlayers().get(0)){
-           return  min(game, -1);
-        }
-            return max(game,  -1);
-    }
-
-
-    public int min(ChessGame game, int depth){
-
-        if(depth == 0 || game.getGameStatus() == GameStatus.BLACK_CHECK_MATE || game.getGameStatus() == GameStatus.WHITE_CHECK_MATE){
-            return this.boardEvaluator.evaluate(game, depth);
-        }
-
-        int lowestValue = Integer.MAX_VALUE;
-
-        for(Move move: game.getBoard().getAllAvailableMoves(PieceColor.BLACK)){
-            game.getBoard().movePiece(move.getSelectedPiece(), move);
-            int currentValue = max(game, depth -1);
-            if(currentValue <= lowestValue)
-            {
-                lowestValue = currentValue;
-            }
-        }
-        return lowestValue;
-    }
-
-    public int max(ChessGame game, int depth){
-        if(depth == 0 || game.getGameStatus() == GameStatus.BLACK_CHECK_MATE || game.getGameStatus() == GameStatus.WHITE_CHECK_MATE){
-            return this.boardEvaluator.evaluate(game, depth);
-        }
-
-        int highestSeenValue = Integer.MIN_VALUE;
-
-        for(Move move: game.getBoard().getAllAvailableMoves(PieceColor.BLACK)){
-            game.getBoard().movePiece(move.getSelectedPiece(), move);
-
-            int currentValue = min(game, depth -1);
-            if(currentValue <= highestSeenValue)
-            {
-                highestSeenValue = currentValue;
-            }
-        }
-        return highestSeenValue;
+    @Override
+    public Move execute(Chessboard chessboard) {
+        
+        return null;
+        
     }
 }

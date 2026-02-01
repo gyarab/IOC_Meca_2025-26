@@ -46,7 +46,9 @@ public class Background {
                
            }
        
-       } ); }
+       } ); 
+    onePlayer.add(onePlayer);
+    }
     }
 
                

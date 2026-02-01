@@ -12,8 +12,8 @@ import Chess.Chesswindowpanel;
  */
 public class Queen extends Pieces {
     
-    public Queen(int color, int col, int row) {
-        super(color, col, row);
+    public Queen(int color, int col, int row, final boolean isFirstMove) {
+        super(color, col, row, true);
         
         type = Types.QUEEN;
     

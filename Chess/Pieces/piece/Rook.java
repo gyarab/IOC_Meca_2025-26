@@ -12,8 +12,8 @@ import Chess.Chesswindowpanel;
  */
 public class Rook extends Pieces {
     
-    public Rook(int color, int col, int row) {
-        super(color, col, row);
+    public Rook(int color, int col, int row, final boolean isFirstMove) {
+        super(color, col, row, true);
         
         type = Types.ROOK;
         

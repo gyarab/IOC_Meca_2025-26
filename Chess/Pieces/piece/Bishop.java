@@ -12,8 +12,8 @@ import Chess.Chesswindowpanel;
  */
 public class Bishop extends Pieces {
     
-    public Bishop(int color, int col, int row) {
-        super(color, col, row);
+    public Bishop(int color, int col, int row, final boolean isFistMove) {
+        super(color, col, row, true);
         
         type = Types.BISHOP;
     

@@ -12,8 +12,8 @@ import Chess.Chesswindowpanel;
  */
 public class Knight extends Pieces {
     
-    public Knight(int color, int col, int row) {
-        super(color, col, row);
+    public Knight(int color, int col, int row,final boolean isFirstMove) {
+        super(color, col, row, true);
         
         type = Types.KNIGHT;
     
