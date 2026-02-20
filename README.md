@@ -32,31 +32,31 @@ Možná nabídka manuální remízy hráčem ve druhém tahu (z pohledu bílého
 
 # Doporučené zdroje k IOČ
 
-https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/
-https://stackoverflow.com/questions/59708531/chess-ai-implementation-in-java-project
-https://github.com/Virksaabnavjot/Chess-AI
-http://www.chesstantra.com/chess-facts/
-https://is.slu.cz/th/zi4wd/FPF_DP_21_Algoritmus_Minimax_a_alfa-beta_orezavani_Juricek_Martin.pdf?lang=cs
-https://is.muni.cz/th/aiw7t/bapr_digital.pdf?kodomez=termin-540379;lang=cs
-https://www.youtube.com/playlist?list=PLOJzCFLZdG4zk5d-1_ah2B4kqZSeIlWtt
-https://github.com/lhartikk/simple-chess-ai
-https://www.geeksforgeeks.org/dsa/backtracking-algorithms/
-https://portal.matematickabiologie.cz/index.php?pg=analyza-a-hodnoceni-biologickych-dat--vicerozmerne-metody-pro-analyzu-dat--volba-a-vyber-popisnych-promennych--selekce-promennych--algoritmy-selekce-promennych--algoritmus-min-max
-https://ksvi.mff.cuni.cz/~dvorak/vyuka/NUIN017/Minimax.pdf
-https://nlp.fi.muni.cz/uui/slajdy-2014/uui07-2.pdf
-https://naos-be.zcu.cz/server/api/core/bitstreams/19ae03fc-5a48-4421-9249-9f0bf08a55fc/content
-https://www.chessprogramming.org/Simplified_Evaluation_Function
-https://github.com/amir650/BlackWidow-Chess
-https://www.youtube.com/playlist?list=PLOJzCFLZdG4zk5d-1_ah2B4kqZSeIlWtt
-https://www.inf.upol.cz/downloads/studium/PS/minimax.pdf
-https://portal.matematickabiologie.cz/index.php?pg=analyza-a-hodnoceni-biologickych-dat--vicerozmerne-metody-pro-analyzu-dat--volba-a-vyber-popisnych-promennych--selekce-promennych--algoritmy-selekce-promennych--algoritmus-min-max
-https://kam.fit.cvut.cz/bi-zum/media/lectures/09-minimax-v5.0-noanim.pdf
-https://ksvi.mff.cuni.cz/~dvorak/vyuka/NUIN017/Minimax.pdf
-https://www.youtube.com/watch?v=NWHIyTRUsMg
-https://en.wikipedia.org/wiki/Computer_chess
+- https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/
+- https://stackoverflow.com/questions/59708531/chess-ai-implementation-in-java-project
+- https://github.com/Virksaabnavjot/Chess-AI
+- http://www.chesstantra.com/chess-facts/
+- https://is.slu.cz/th/zi4wd/FPF_DP_21_Algoritmus_Minimax_a_alfa-beta_orezavani_Juricek_Martin.pdf?lang=cs
+- https://is.muni.cz/th/aiw7t/bapr_digital.pdf?kodomez=termin-540379;lang=cs
+- https://www.youtube.com/playlist?list=PLOJzCFLZdG4zk5d-1_ah2B4kqZSeIlWtt
+- https://github.com/lhartikk/simple-chess-ai
+- https://www.geeksforgeeks.org/dsa/backtracking-algorithms/
+-https://portal.matematickabiologie.cz/index.php?pg=analyza-a-hodnoceni-biologickych-dat--vicerozmerne-metody-pro-analyzu-dat--volba-a-vyber-popisnych-promennych--selekce-promennych--algoritmy-selekce-promennych--algoritmus-min-max
+- https://ksvi.mff.cuni.cz/~dvorak/vyuka/NUIN017/Minimax.pdf
+- https://nlp.fi.muni.cz/uui/slajdy-2014/uui07-2.pdf
+- https://naos-be.zcu.cz/server/api/core/bitstreams/19ae03fc-5a48-4421-9249-9f0bf08a55fc/content
+- https://www.chessprogramming.org/Simplified_Evaluation_Function
+- https://github.com/amir650/BlackWidow-Chess
+- https://www.youtube.com/playlist?list=PLOJzCFLZdG4zk5d-1_ah2B4kqZSeIlWtt
+- https://www.inf.upol.cz/downloads/studium/PS/minimax.pdf
+- https://portal.matematickabiologie.cz/index.php?pg=analyza-a-hodnoceni-biologickych-dat--vicerozmerne-metody-pro-analyzu-dat--volba-a-vyber-popisnych-promennych--selekce-promennych--algoritmy-selekce-promennych--algoritmus-min-max
+- https://kam.fit.cvut.cz/bi-zum/media/lectures/09-minimax-v5.0-noanim.pdf
+- https://ksvi.mff.cuni.cz/~dvorak/vyuka/NUIN017/Minimax.pdf
+- https://www.youtube.com/watch?v=NWHIyTRUsMg
+- https://en.wikipedia.org/wiki/Computer_chess
 
 Obrázky:
-https://i.sstatic.net/hxGdi.png
+- https://i.sstatic.net/hxGdi.png
 
 # Dokumentace k projektu
 - **[Dokumentace_šachový program s AI_meca](https://docs.google.com/document/d/1e2D7Z-hu4OAku_vGMSUD6-O09_C6q0FpCqjCMMv7Eqg/edit?tab=t.0)**
