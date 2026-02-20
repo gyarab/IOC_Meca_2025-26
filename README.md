@@ -2,6 +2,8 @@
 
 Tento repozitář obsahuje zdrojové soubory k mojí ročníkové práci (IOČ).
 
+# Spuštění programu
+
 # Počítačová simulace šachové partie proti umělé inteligenci 
 
 Ročníkový projekt napsaný v Javě, jehož cílem je vytvořit plnohodnotnou šachovou aplikaci s GUI, kde si hráč může zahrát proti AI. Aplikace umonžňuje uživateli detekovat všech herní stavy
@@ -25,3 +27,6 @@ Implementace remízových stavů mimo patu – pravidlo 50 tahů a detekce nedos
 
 
 Možná nabídka manuální remízy hráčem ve druhém tahu (z pohledu bílého) a možnost se vzdát po prvních dvou tazích.
+
+# Dokumentace k projektu
+- **[Dokumentace_šachový program s AI_meca](https://docs.google.com/document/d/1e2D7Z-hu4OAku_vGMSUD6-O09_C6q0FpCqjCMMv7Eqg/edit?tab=t.0)**
