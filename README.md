@@ -28,5 +28,5 @@ Implementace remízových stavů mimo patu – pravidlo 50 tahů a detekce nedos
 
 Možná nabídka manuální remízy hráčem ve druhém tahu (z pohledu bílého) a možnost se vzdát po prvních dvou tazích.
 
-# Dokumentace k projektu
+# Dokumentace k projektu (není ještě hotová)
 - **[Dokumentace_šachový program s AI_meca](https://docs.google.com/document/d/1e2D7Z-hu4OAku_vGMSUD6-O09_C6q0FpCqjCMMv7Eqg/edit?tab=t.0)**
