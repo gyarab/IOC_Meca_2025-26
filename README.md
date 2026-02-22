@@ -20,7 +20,7 @@ Navázání na stávající šachový program, který byl použit jako ročníko
 Přidání časomíry - vytvoření hodin, které zaznamenávají a spravují časy obou hráčů s možností nastavení limitů. 
 
 Integrace šachového bota (AI) - přidání logiky pro hraní počítačem. Boti budou schopni vyhodnocovat pozice pomocí evaluačních funkcí a volit nejlepší tahy v závislosti na zvolené hloubce prohledávání podle algoritmů MiniMax, 
-popř. pomocí vylepšeného algoritmu Minimax s Alfa-beta ořezávání. 
+popř. pomocí vylepšeného algoritmu Minimax s Alfa-betou ořezávání. 
 
 Přidání vizuálních efektů – zvýraznění možných tahů, efekty při braní figur, proměně pěšce, apod.
 
