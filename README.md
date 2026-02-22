@@ -11,8 +11,7 @@ Tento repozitář obsahuje zdrojové soubory k mojí ročníkové práci (IOČ).
 
 # Počítačová simulace šachové partie proti umělé inteligenci 
 
-Ročníkový projekt napsaný v Javě, jehož cílem je vytvořit plnohodnotnou šachovou aplikaci s GUI, kde si hráč může zahrát proti AI. Aplikace umonžňuje uživateli detekovat všech herní stavy
-- včetně speciálních tahů a ukončovacích podmínek. Aplikace bude mít vizuálně přivětivé prostředí, které bude zábavné a srozumitelné i pro začátečníky. 
+Ročníkový projekt napsaný v Javě, jehož cílem je vytvořit plnohodnotnou šachovou aplikaci s GUI, kde si hráč může zahrát proti AI. Aplikace umonžňuje uživateli detekovat všechny herní stavy včetně speciálních tahů a ukončovacích podmínek. Aplikace bude mít vizuálně přivětivé prostředí, které bude zábavné a srozumitelné i pro začátečníky. 
 
 # Postup implementace
 
