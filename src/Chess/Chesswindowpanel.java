@@ -823,7 +823,8 @@ public class Chesswindowpanel extends JPanel implements Runnable {
                     } //repair catch
                     catch (InterruptedException e) {
                     }
-                    makeComputerMove();  // AI udělá svůj tah
+                    performAIMove();  // AI udělá svůj tah
+                    //makeComputerMove();
 
                     // Po tahu AI přepneme zpět na hráče
                     if (isDisplayable()) {
