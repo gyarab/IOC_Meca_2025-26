@@ -28,11 +28,4 @@ public class Move {
         this.capturedPiece = capturedPiece;
         this.value = value;
     }
-
-    static enum MoveStatus {
-
-        DONE, //move has done
-        ILLEGAL_MOVE, //not legal move
-        LEAVES_KING_IN_CHECK; //after move the king is in check    
-    }
 }
