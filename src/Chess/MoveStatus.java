@@ -8,19 +8,23 @@ package Chess;
  *
  * @author mecova
  */
-public class MoveStatus {
-//This class is for AI 
-    
-    boolean legal;
-    boolean check;
-    boolean checkmate;
-    boolean stalemate;
-    boolean capture;
-    boolean promotion;
-    boolean castling;
-
-    public MoveStatus(boolean legal) {
-        this.legal = legal;
+public enum MoveStatus {
+       
+          DONE { //move has done
+            public boolean isDone() {
+                return true;
+            }
+        },
+        ILLEGAL_MOVE {  //not legal move
+            public boolean isDone() {
+                return false;
+            }
+        },
+        LEAVES_PLAYER_IN_CHECK { //after move the king is in check  
+            public boolean isDone() {
+                return false;
+            }
+        };
     }
-}
+
 
