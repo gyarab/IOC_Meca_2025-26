@@ -33,7 +33,7 @@ WHITE {
     
     @Override 
     public boolean isPawnPromotionSquare(int position){
-        return BoardUtils.FIRST_RANK[position];
+        return false; // default value
     }
     
     @Override
@@ -65,7 +65,7 @@ BLACK{
     
     @Override 
     public boolean isPawnPromotionSquare(int position){
-        return BoardUtils.EIGHT_RANK[position];
+        return false; // default value
     }   
     
     @Override 
