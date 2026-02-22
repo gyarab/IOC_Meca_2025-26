@@ -6,7 +6,8 @@ Tento repozitář obsahuje zdrojové soubory k mojí ročníkové práci (IOČ).
 
 1) nejprve je potřeba stáhnout všechny třídy s obrázky figurek a následně je spustit v nějakém IDE (např. NetBeans, Apache Netbeans či JetBrains)
 2) poté je třeba nastavit jako hlavní třídu Chesswindow, která obsahuje kód pro vykreslení hlavního okna programu
-3) nakonec je třeba chvíli počkat než se spustí vlákno a zavolají se příslušné třídy s metodami
+3) pak se program jednoduše spustí např. v editoru třídy Chesswindow pomocí klávesové zkratky Shift + F6 nebo stisknutím pravého tlačítka na daný soubor (v tomto případě třída Chesswindow) v okně projektu ("Projects") a zvolením "Run File", kde si mj. můžete všimnout, že je k ní uvedená také výše zmíněná klávesová zkratka
+4) nakonec je třeba chvíli počkat než se spustí vlákno a zavolají se příslušné třídy s metodami
 
 # Počítačová simulace šachové partie proti umělé inteligenci 
 
