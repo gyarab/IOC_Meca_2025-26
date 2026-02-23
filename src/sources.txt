@@ -14,3 +14,4 @@
 ./Chess/Chesswindowpanel.java
 ./Chess/Chesswindow.java
 ./Chess/MiniMax.java
+./Chess/Move.java
