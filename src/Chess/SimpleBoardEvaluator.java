@@ -181,7 +181,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
     }
 
     private static int kingSafety(final Player player) {
-        final int tropism = KingSafetyAnalyzer.get().calculateKingTropism(player); //I need to create this class in package Chess
+        final int tropism = KingSafetyAnalyzer.get().calculateKingTropism(player); // The distance of the attacking pieces from the opponent's king
         final int safety = KingSafetyAnalyzer.get().gptKingSafety(player);
         return tropism + safety;
     }
