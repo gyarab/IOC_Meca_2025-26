@@ -98,6 +98,9 @@ public final class KingSafetyAnalyzer {
         }
 
         public int tropismScore() {
+             if (this.enemyPiece == null) {
+                return 0;
+            }
             return -(this.enemyPiece.getPieceValue() / 100) * (8 - this.distance); // I need to create this method in class Pieces in package Chess
         }
 
