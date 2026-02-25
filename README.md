@@ -1,6 +1,6 @@
 # IOC_Meca_2025-26
 
-Tento repozitář obsahuje zdrojové soubory a obrázky k mojí ročníkové práci (IOČ).
+Tento repozitář obsahuje zdrojové soubory, strukturu projektu v textovém souboru sources.txt a obrázky k mojí ročníkové práci (IOČ).
 
 # Spuštění programu
 
