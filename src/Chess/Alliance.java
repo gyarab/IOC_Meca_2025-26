@@ -37,7 +37,7 @@ public enum Alliance {
         }
 
         @Override
-        public Player choosePlayer(final WhitePlayer whitePlayer,
+        public Player choosePlayerByAlliance(final WhitePlayer whitePlayer,
                 final BlackPlayer blackPlayer) {
             return whitePlayer;
         }
@@ -69,7 +69,7 @@ public enum Alliance {
         }
 
         @Override
-        public Player choosePlayer(final WhitePlayer whitePlayer,
+        public Player choosePlayerByAlliance(final WhitePlayer whitePlayer,
                 final BlackPlayer blackPlayer) {
             return blackPlayer;
 
@@ -86,7 +86,7 @@ public enum Alliance {
 
     public abstract boolean isPawnPromotionSquare(int position);
 
-    public abstract Player choosePlayer(final WhitePlayer whitePlayer,
+    public abstract Player choosePlayerByAlliance(final WhitePlayer whitePlayer,
             final BlackPlayer blackPlayer);
 
 }
