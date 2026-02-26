@@ -1,30 +1,84 @@
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
-import Chess.Pieces.piece.Types;
+import Chess.Pieces.piece.*;
+import java.util.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.Stack;
 
-public class Chessboard {
+public final class Chessboard {
 
     public static final int MAX_COL = 8;
     public static final int MAX_ROW = 8;
     public static final int SQUARE_SIZE = 100;
     public static final int HALF_SQUARE_SIZE = SQUARE_SIZE / 2;
-
+    
+   private final Pieces[] boardPieces;
+   private final int[] whitePieceCoordinates;
+   private final int[] blackPieceCoordinates;
+   private final WhitePlayer whiteplayer;
+   private final BlackPlayer blackPlayer;
+   private final Player currentPlayer;
+   private final Pawn enPassantPawn;
+    
     private int evaluation; //actual value of position
     private Pieces[][] board = new Pieces[MAX_ROW][MAX_COL];
     private ArrayList<Pieces> pieces = new ArrayList<>();
     private Stack<Move> moveHistory = new Stack<>();
     
+//    private static final Chessboard STANDARD_BOARD = createStandardBoardImpl();
+
     private int sideToMove = Chesswindowpanel.WHITE;
 
+    Chessboard(Builder builder) {
+        this.boardPieces = builder.boardPieces;
+        this.whitePieceCoordinates = calculateActiveIndexes(boardPieces, Alliance.WHITE);
+        this.blackPieceCoordinates = calculateActiveIndexes(boardPieces, Alliance.BLACK);
+        this.enPassantPawn = builder.enPassantPawn;
+        final Collection<Move> whiteStandardMoves = calculateLegalMoves(boardPieces, this.whitePieceCoordinates);
+        final Collection<Move> blackStandardMoves = calculateLegalMoves(boardPieces, this.blackPieceCoordinates);
+        this.whiteplayer = new WhitePlayer(this, establishKing(this.whitePieceCoordinates, this.boardPieces), whiteStandardMoves, blackStandardMoves);
+        this.blackPlayer = new BlackPlayer(this, establishKing(this.blackPieceCoordinates, this.boardPieces), whiteStandardMoves, blackStandardMoves);
+        this.currentPlayer = builder.nextMoveMaker.choosePlayerByAlliance(this.whiteplayer, this.blackPlayer);
+    }
+    
+    
     public int getSideToMove() {
         return sideToMove;
     }
-
+    
+    public WhitePlayer whitePlayer(){
+        return this.whiteplayer;
+    }
+    
+    public BlackPlayer blackPlayer(){
+        return this.blackPlayer;
+    }
+    
+    public Player currentPlayer(){
+        return this.currentPlayer;
+    }
+    
+    public Pieces[] getBoardPieces(){
+        return this.boardPieces;
+    }
+    
+    public Pieces[] getPieces(){
+        return this.boardPieces;
+    }
+    
+     public Pieces[] getBoardCopy() {
+        return this.boardPieces.clone();
+    }
+     
+    public static Chessboard createStandardBoard() {
+        return STANDARD_BOARD;
+    } 
+    
+    public Pawn getEnPassantPawn(){
+        return this.enPassantPawn;
+    }
+   
+    
     public void switchSide() {
         sideToMove = (sideToMove == Chesswindowpanel.WHITE)
                 ? Chesswindowpanel.BLACK
@@ -35,42 +89,20 @@ public class Chessboard {
         
         return true;
         
-    }
-
-    /* =========================
-       MOVE
-       ========================= */
-    public static class Move {
-        public Pieces piece;
-        public int startRow, startCol;
-        public int targetRow, targetCol;
-        public Pieces capturedPiece;
-        public int value;
-
-        public Move(Pieces piece,
-                    int startRow, int startCol,
-                    int targetRow, int targetCol,
-                    Pieces capturedPiece,
-                    int value) {
-            this.piece = piece;
-            this.startRow = startRow;
-            this.startCol = startCol;
-            this.targetRow = targetRow;
-            this.targetCol = targetCol;
-            this.capturedPiece = capturedPiece;
-            this.value = value;
-        }
-
-        public Pieces getPiece() {
-           return piece;
-        }
-    }
+    }    
 
     /* =========================
        GETTERS
        ========================= */
-    public ArrayList<Pieces> getPieces() {
-        return pieces;
+       public Collection<Pieces> getAllPieces() {
+        final List<Pieces> allPieces = new ArrayList<>(this.whitePieceCoordinates.length + this.blackPieceCoordinates.length);
+        for (final int index : this.whitePieceCoordinates) {
+            allPieces.add(this.boardPieces[index]);
+        }
+        for (final int index : this.blackPieceCoordinates) {
+            allPieces.add(this.boardPieces[index]);
+        }
+        return Collections.unmodifiableList(allPieces);
     }
 
     public Pieces getPiece(int row, int col) {
@@ -96,108 +128,7 @@ public class Chessboard {
        MOVE / UNDO
        ========================= */
     private final PSQT psqt = new PSQT();
-    
-    public void movePiece(Move move) {
-       
-        Pieces p = move.piece;
-        
-        int fromSq = move.startRow * 8 + move.startCol;
-        int toSq = move.targetRow * 8 + move.targetCol;
-        
-        if(!p.isWhite()){
-          fromSq ^= 56;
-          toSq   ^= 56;
-        }
-        
-        // PSQT aktualizace
-        evaluation -= psqt.getPieceTableValue(p.getType(), fromSq);
-        evaluation += psqt.getPieceTableValue(p.getType(), toSq);
-        
-        //fyzický tah
-        board[move.startRow][move.startCol] = null;
-        board[move.targetRow][move.targetCol] = p;
-
-        p.row = move.targetRow;
-        p.col = move.targetCol;
-
-        if (move.capturedPiece != null) {
-            pieces.remove(move.capturedPiece);
-        }
-        
-        moveHistory.push(move);
-    }
-
-    public void undoMove() {
-        if (moveHistory.isEmpty()){ 
-            return;
-        }
-        
-        Move move = moveHistory.pop();
-        Pieces p = move.piece;
-        
-        int fromSq = move.startRow * 8 + move.startCol;
-        int toSq   = move.targetRow * 8 + move.targetCol;
-         
-        if (!p.isWhite()) {
-        fromSq ^= 56;
-        toSq   ^= 56;
-        }
-        
-        evaluation += psqt.getPieceTableValue(p.getType(), fromSq);
-        evaluation -= psqt.getPieceTableValue(p.getType(), toSq);
-        
-        board[move.targetRow][move.targetCol] = move.capturedPiece;
-        board[move.startRow][move.startCol] = p;
-        
-        p.row = move.startRow;
-        p.col = move.startCol;
-        
-        if(move.capturedPiece != null){
-            pieces.add(move.capturedPiece);
-        }
-    
-    }
-
-    /* =========================
-       MOVE GENERATION
-       ========================= */
-    public ArrayList<Move> getAllAvailableMoves(int color) {
-        ArrayList<Move> moves = new ArrayList<>();
-
-        for (Pieces p : pieces) {
-            if (p.color != color) continue;
-
-            for (int r = 0; r < MAX_ROW; r++) {
-                for (int c = 0; c < MAX_COL; c++) {
-                    if (!p.canMove(c, r)) continue;
-
-                    Pieces captured = board[r][c];
-                    moves.add(new Move(
-                            p,
-                            p.row, p.col,
-                            r, c,
-                            captured,
-                            0
-                    ));
-                }
-            }
-        }
-        return moves;
-    }
-
-    public ArrayList<Move> getLegalMoves(int color) {
-        ArrayList<Move> legal = new ArrayList<>();
-
-        for (Move m : getAllAvailableMoves(color)) {
-            movePiece(m);
-            if (!isKingInCheck(color)) {
-                legal.add(m);
-            }
-            undoMove();
-        }
-        return legal;
-    }
-    
+   
     public int getEvaluation(){
         return evaluation;
     }
@@ -214,7 +145,10 @@ public class Chessboard {
                 break;
             }
         }
-        if (king == null) return false;
+        if (king == null){ 
+            return false;
+        
+        }
 
         for (Pieces p : pieces) {
             if (p.color != color && p.canMove(king.col, king.row)) {
@@ -237,8 +171,95 @@ public class Chessboard {
             : -psqt.getPieceTableValue(p.getType(), sq);
     }
 }
+    
+    private static Chessboard createStandardBoardImpl(){
+      final Builder builder = new Builder(); 
+      //Black layout
+      //White layout
+      //return builder.build();
+      return null;
+    }
+    
+    public Collection<Move> getAllLegalMoves() {
+    return Stream.concat(this.whiteplayer.getLegalMoves().stream(),
+                         this.blackPlayer.getLegalMoves().stream())
+                         .collect(Collectors.toList());
+    }
 
-
+    private Collection<Move> calculateLegalMoves(final Pieces[] boardConfig, 
+                                                 final int[] pieces){
+        final Collection<Move> legalsMove = new ArrayList<>();
+        for(final int piece_index : pieces) {
+           legalsMove.addAll(boardConfig[piece_index].calculateLegalMoves(this));  
+        }
+         System.out.println("Legals move are these:" + legalsMove);
+        return legalsMove;
+    }
+    
+    private static int[] calculateActiveIndexes(final Pieces[] boardConfig, final Alliance alliance){
+        
+        final int[] result = new int[boardConfig.length];
+        int count = 0;
+        for(int idx = 0; idx < boardConfig.length; idx++){
+            final Pieces piece = boardConfig[idx];
+            if(piece != null && piece.getPieceAllegiance() == alliance){ // I need to create this method in class Pieces
+                result[count++] = idx;
+            }
+        }
+        return Arrays.copyOf(result, count);
+    }
+    
+    private static King establishKing(final int[] activeIndexes, final Pieces[] boardConfig){
+        
+        for(final int index : activeIndexes) {
+            final Pieces piece = boardConfig[index];
+            if(piece.getPieceType() == Pieces.PieceType.KING){
+                return (King) piece;
+            }
+        }
+        throw new RuntimeException("No king found for player!");
+    }
+    
+    public static class Builder {
+        
+        Pieces[] boardPieces;
+        Alliance nextMoveMaker;
+        Pawn enPassantPawn;
+        
+        public Builder() {
+            this.boardPieces = new Pieces[BoardUtils.NUM_TILES];
+        }
+        
+        public Builder setBoardConfig(final Pieces[] boardConfig) {
+            this.boardPieces = boardConfig;
+            return this;
+        }
+        
+        public Builder setPiece(final Pieces piece) {
+            this.boardPieces[piece.getPiecePosition()] = piece;
+            return this;
+        }
+        
+        public Builder setMoveMaker(final Alliance nextMoveMaker) {
+            this.nextMoveMaker = nextMoveMaker;
+            return this;
+        }
+        
+        public Builder setEnPassantPawn(final Pawn enPassantPawn) {
+            this.enPassantPawn = enPassantPawn;
+            return this;
+        }
+        
+        public Builder build(){
+           return new Chessboard(this);
+        }
+    }
+    
+    
+    
+    
+    
+    
     /* =========================
        DRAW
        ========================= */
