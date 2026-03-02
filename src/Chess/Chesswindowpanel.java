@@ -5,6 +5,7 @@
  */
 package Chess;
 
+import Chess.Chessboard.Builder;
 import Chess.Pieces.piece.Bishop;
 import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Knight;
@@ -47,9 +48,9 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     public static final int HEIGHT = 810;
     final int FPS = 60;
     Thread gameThread;
-    Chessboard board = new Chessboard();
+    Chessboard board = new Chessboard(new Builder());
     Mouse mouse = new Mouse();
-    Chessboard.Move bestMove;
+    Move bestMove;
 
     //Pieces
     public static ArrayList<Pieces> pieces = new ArrayList<>();
@@ -169,7 +170,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         button4();
         button5();
         initKeyBindings(this);
-        board = new Chessboard();
+        board = new Chessboard(new Builder());
         currentColor = WHITE; // začíná bílý
 
         // Inicializace bestMove až po inicializaci board a currentColor
@@ -184,7 +185,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
                 throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
             }
         }, 3); // hloubka 3
-        Chessboard.Move bestMove = (Chessboard.Move) ai.execute(board, 3);
+        Move bestMove = (Move) ai.execute(board, 3);
 
         if (bestMove != null) {
             board.movePiece(bestMove);
@@ -1052,7 +1053,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         }, 3); // hloubka 3
 
         // Spustíme MiniMax s aktuální šachovnicí a hloubkou
-        Chessboard.Move bestMove = (Chessboard.Move) ai.execute(board, 3);
+        Move bestMove = (Move) ai.execute(board, 3);
 
         if (bestMove != null) {
             // Provedeme tah
@@ -1373,7 +1374,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         );
     }
 
-    private static class MoveImpl extends Chessboard.Move {
+    private static class MoveImpl extends Move {
 
         public MoveImpl(Pieces p,
                 int startRow, int startCol,
