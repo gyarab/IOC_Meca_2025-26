@@ -264,13 +264,12 @@ public class Pieces {
     }
 
     public boolean isWhite() {
-        Pieces p = new Pieces(color, col, row, isFirstMove);
-        if (p.color == Chesswindowpanel.WHITE) {
-            return true;
-        }
-        return false;
+        return this.color == Chesswindowpanel.WHITE;
     }
 
+    public boolean isBlack() {
+        return this.color == Chesswindowpanel.BLACK;
+    }
     public void draw(Graphics2D g2) {
         if (image != null) {
             g2.drawImage(image, x, y, Chessboard.SQUARE_SIZE, Chessboard.SQUARE_SIZE, null);
@@ -284,3 +283,4 @@ public class Pieces {
     }
 
 }
+
