@@ -10,6 +10,18 @@ package Chess.Pieces.piece;
  * @author Admin
  */
 public enum Types {
-   PAWN,KNIGHT,ROOK,QUEEN,BISHOP,KING;
+   PAWN(100),KNIGHT(300),ROOK(500),QUEEN(900),BISHOP(330),KING(1000);
+
+   private final int value;
+
+   private Types(int value) {
+       this.value = value;
+   }
+
+   public int getPieceValue() {
+       return value;
+   }
+
 }
+
 
