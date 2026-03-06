@@ -1,7 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+  /*
+     * To change this license header, choose License Headers in Project Properties.
+     * To change this template file, choose Tools | Templates
+     * and open the template in the editor.
  */
 package Chess;
 
@@ -174,7 +174,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         currentColor = WHITE; // začíná bílý
 
         // Inicializace bestMove až po inicializaci board a currentColor
-//    bestMove = (Chessboard.Move) ai.execute(board, getCurrentColor());
+        //    bestMove = (Chessboard.Move) ai.execute(board, getCurrentColor());
     }
 
     // Spustí AI tah pro aktuálního hráče
@@ -316,14 +316,13 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         }
 
     }
-
-    private void update() {
+private void update() {
 
         if (promotion) { //I basically stop the game during the promotion, so I cannot pick up other pieces, until I finish this promotion process
             promoting();
         } else if (gameover == false && stalemate == false) {
             ///MOUSE BUTTON PRESSED///
-        if (mouse.pressed) {
+            if (mouse.pressed) {
                 //If the activeP (active piece) is null, check if you can pick up a piece
                 if (activeP == null) {
                     //scanning this simPieces Arraylist<>()
@@ -341,8 +340,8 @@ public class Chesswindowpanel extends JPanel implements Runnable {
                 }
             }
             ///MOUSE BUTTON RELEASED///
-        //So if the player released the mouse button when he is holding a piece
-        if (mouse.pressed == false) {
+            //So if the player released the mouse button when he is holding a piece
+            if (mouse.pressed == false) {
                 if (activeP != null) {
                     if (validSquare) {
                         //MOVE CONFIRMED
@@ -588,57 +587,57 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     }
 
     // Vrátí všechny možné tahy pro danou barvu
-// Vrátí všechny možné tahy pro danou barvu
-//public ArrayList<Chessboard.Move> getAllAvailableMoves(int color) {
-//    ArrayList<Chessboard.Move> moves = new ArrayList<>();
-//
-//    for (Pieces p : pieces) {
-//        if (p.color != color) continue; // přeskočíme soupeřovy figury
-//
-//        for (int r = 0; r < 8; r++) {
-//            for (int c = 0; c < 8; c++) {
-//                // Reset simulovaných figur
-//                copyPieces(pieces, simPieces);
-//
-//                int originalCol = p.col;
-//                int originalRow = p.row;
-//
-//                if (p.canMove(c, r)) {
-//                    Pieces captured = null;
-//                    for (Pieces target : simPieces) {
-//                        if (target != p && target.col == c && target.row == r) {
-//                            captured = target;
-//                            simPieces.remove(target);
-//                            break;
-//                        }
-//                    }
-//
-//                    // Pokud tah není ilegální a král není ohrožen
-//                    if (!isIlegalmove(p) && !opponentCanCaptureKing()) {
-//
-//                    Pieces capturedPieces = board[row][col];
-//
-//                    moves.add(new MoveImpl(
-//                    p,
-//                    p.row, p.col,   // START
-//                    r, c,           // CÍL
-//                    captured,
-//                    evaluateMove(p, c, r)
-//    ));
-//}
-//
-//                    // Obnovíme původní pozici
-//                    p.col = originalCol;
-//                    p.row = originalRow;
-//                    copyPieces(pieces, simPieces);
-//                    if (captured != null) simPieces.add(captured);
-//                }
-//            }
-//        }
-//    }
-//
-//    return moves;
-//}
+    // Vrátí všechny možné tahy pro danou barvu
+    //public ArrayList<Chessboard.Move> getAllAvailableMoves(int color) {
+    //    ArrayList<Chessboard.Move> moves = new ArrayList<>();
+    //
+    //    for (Pieces p : pieces) {
+    //        if (p.color != color) continue; // přeskočíme soupeřovy figury
+    //
+    //        for (int r = 0; r < 8; r++) {
+    //            for (int c = 0; c < 8; c++) {
+    //                // Reset simulovaných figur
+    //                copyPieces(pieces, simPieces);
+    //
+    //                int originalCol = p.col;
+    //                int originalRow = p.row;
+    //
+    //                if (p.canMove(c, r)) {
+    //                    Pieces captured = null;
+    //                    for (Pieces target : simPieces) {
+    //                        if (target != p && target.col == c && target.row == r) {
+    //                            captured = target;
+    //                            simPieces.remove(target);
+    //                            break;
+    //                        }
+    //                    }
+    //
+    //                    // Pokud tah není ilegální a král není ohrožen
+    //                    if (!isIlegalmove(p) && !opponentCanCaptureKing()) {
+    //
+    //                    Pieces capturedPieces = board[row][col];
+    //
+    //                    moves.add(new MoveImpl(
+    //                    p,
+    //                    p.row, p.col,   // START
+    //                    r, c,           // CÍL
+    //                    captured,
+    //                    evaluateMove(p, c, r)
+    //    ));
+    //}
+    //
+    //                    // Obnovíme původní pozici
+    //                    p.col = originalCol;
+    //                    p.row = originalRow;
+    //                    copyPieces(pieces, simPieces);
+    //                    if (captured != null) simPieces.add(captured);
+    //                }
+    //            }
+    //        }
+    //    }
+    //
+    //    return moves;
+    //}
     private boolean kingCanMove(Pieces king) { //I check if the king in check can move to a square where it is not under attack
         //here is some problem
         //Simulate if there is any square where the king can move to
@@ -872,7 +871,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
                             break;
                         default:
                             break; //If no type matches, nothing happens
-                    }
+                        }
                     simPieces.remove(activeP.getIndex());//after that I remove the pawn from this list
                     copyPieces(simPieces, pieces); //I update this backup list
                     activeP = null;
@@ -987,7 +986,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         this.add(compButton);
     }
 
-    private void button5() {
+private void button5() {
         javax.swing.JButton setUpButton = new javax.swing.JButton("Set position");
         setUpButton.setBounds(850, 300, 200, 55);
         setUpButton.setFont(new Font("Book Antiqua", Font.BOLD, 18));
@@ -1061,7 +1060,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         }
     }
 
-// Jednoduchá ohodnocovací funkce
+    // Jednoduchá ohodnocovací funkce
     int evaluateMove(Pieces p, int targetCol, int targetRow) {
         int score = 0;
 
@@ -1108,12 +1107,12 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         return score;
     }
 
-// Metoda pro fyzické provedení tahu (bez myši)
+    // Metoda pro fyzické provedení tahu (bez myši)
     private void performMove(Pieces piece, int col, int row) {
         // 1. Najdeme figuru v reálném listu 'pieces'
         Pieces realPiece = null;
         for (Pieces p : pieces) {
-            // Porovnáváme ideálně přes referenci, nebo přes ID, pokud máš. 
+            // Porovnáváme ideálně přes referenci, nebo přes ID, pokud máš.
             // Zde spoléháme na to, že objekt z 'makeComputerMove' (p) je z listu 'pieces'.
             // Pokud p pochází z kopie, musíme najít originál podle souřadnic/typu.
             if (p.type == piece.type && p.color == piece.color && p.col == piece.col && p.row == piece.row) {
@@ -1122,7 +1121,8 @@ public class Chesswindowpanel extends JPanel implements Runnable {
             }
         }
 
-        // Pokud se nepodařilo najít (pojistka)
+
+// Pokud se nepodařilo najít (pojistka)
         if (realPiece == null) {
             if (pieces.contains(piece)) {
                 realPiece = piece;
@@ -1186,10 +1186,10 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         changePlayer();
         repaint();
     }
-// Pomocná metoda pro rošádu počítače (pokud ji chcete podporovat)
+    // Pomocná metoda pro rošádu počítače (pokud ji chcete podporovat)
 
     private boolean checkCastlingForComputer(Pieces p) {
-        // Vaše metoda checkCastling spoléhá na logiku pohybu myší, 
+        // Vaše metoda checkCastling spoléhá na logiku pohybu myší,
         // pro bota by se musela upravit. Pro základní verzi stačí vrátit false.
         return false;
     }
@@ -1286,7 +1286,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         //The player has a turn
         sb.append("turn_").append(currentColor).append(";");
 
-        //Information about castlings   
+        //Information about castlings  
         boolean whiteKingMoved = false, blackKingMoved = false;
         boolean whiteRookLeftMoved = false, whiteRookRightMoved = false;
         boolean blackRookLeftMoved = false, blackRookRightMoved = false;
@@ -1355,7 +1355,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         draw = false;
         promotion = false;
         currentColor = WHITE;
-        //Important: you need t 
+        //Important: you need t
         if (positionHistory != null) {
             positionHistory.clear();
         }
@@ -1374,21 +1374,4 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         );
     }
 
-    private static class MoveImpl extends Move {
-
-        public MoveImpl(Pieces p,
-                int startRow, int startCol,
-                int targetRow, int targetCol,
-                Pieces capturedPiece,
-                int value) {
-
-            super(
-                    p,
-                    startRow, startCol,
-                    targetRow, targetCol,
-                    capturedPiece,
-                    value
-            );
-        }
-    }
 }
