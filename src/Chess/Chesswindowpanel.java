@@ -164,10 +164,10 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         setUpInitialPosition();
         //zavolat initializeEvaluation
         copyPieces(pieces, simPieces);
-        button();
-        button2();
-        button3();
-        button4();
+        createButton();
+        createButton2();
+        createButton3();
+        createButton4();
         createButton5();
         initKeyBindings(this);
         board = new Chessboard(new Builder());
@@ -882,7 +882,7 @@ private void update() {
         }
     }
 
-    private void button() {
+    private void createButton() {
         javax.swing.JButton remizButton = new javax.swing.JButton("Offer a draw");
         remizButton.setBounds(850, 130, 200, 50); //Position and size of the button
         remizButton.setFont(new Font("Book Antiqua", Font.BOLD, 20));
@@ -905,7 +905,7 @@ private void update() {
         this.add(remizButton);
     }
 
-    private void button2() {
+    private void createButton2() {
         javax.swing.JButton giveupButton = new javax.swing.JButton("Give up");
         giveupButton.setBounds(850, 700, 200, 50); //Position and size of the button
         giveupButton.setFont(new Font("Book Antiqua", Font.BOLD, 20));
@@ -933,7 +933,7 @@ private void update() {
         this.add(giveupButton);
     }
 
-    private void button3() {
+    private void createButton3() {
         javax.swing.JButton newGameButton = new javax.swing.JButton("New game");
         newGameButton.setBounds(850, 750, 200, 50);
         newGameButton.setFont(new Font("Book Antiqua", Font.BOLD, 20));
@@ -957,7 +957,7 @@ private void update() {
         this.add(newGameButton);
     }
 
-    private void button4() {
+    private void createButton4() {
         javax.swing.JButton compButton = new javax.swing.JButton("Play vs PC");
         compButton.setBounds(850, 650, 200, 50);
         compButton.setFont(new Font("Book Antiqua", Font.BOLD, 20));
@@ -1375,4 +1375,5 @@ private void createButton5() {
     }
 
 }
+
 
