@@ -31,6 +31,8 @@ public abstract class Pieces {
     public Pieces activeP;
     public boolean hasmoved, twoStepped;
     private final boolean isFirstMove;
+    private final int cachedHashCode;
+    private final int piecePosition;
 
     public Pieces(int color, int col, int row, final boolean isFirstMove) {
         this.color = color;
@@ -296,4 +298,5 @@ public abstract class Pieces {
             System.out.println("Obrázek nebyl načten!");
         }
     }
+
 }
