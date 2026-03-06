@@ -21,7 +21,7 @@ import javax.imageio.ImageIO;
  */
 public abstract class Pieces {
 
-    public Alliance alliance;
+    public Alliance pieceAlliance;
     public Types type;
     public BufferedImage image;
     public int x, y;
@@ -43,6 +43,8 @@ public abstract class Pieces {
         this.pceCol = col;
         this.pceRow = row;
         this.isFirstMove = isFirstMove;
+        this.cachedHashCode = computeHashCode();
+        this.piecePosition = getPiecePosition();
     }
 
     public BufferedImage getImage(String imagePath) {
@@ -99,11 +101,11 @@ public abstract class Pieces {
     }
 
     public int getPiecePosition() {
-        return x + y;
+        return piecePosition;
     }
 
     public Alliance getPieceAllegiance() {
-        return alliance;
+        return pieceAlliance;
     }
 
     public boolean isWhite() {
@@ -114,11 +116,45 @@ public abstract class Pieces {
         return this.color == Chesswindowpanel.BLACK;
     }
 
+    public boolean isFirstMove() {
+        return this.isFirstMove;
+    }
+
+    public int getPieceValue() {
+        return type.getPieceValue();
+    } 
+
     public abstract int locationBonus();
 
     public abstract Pieces getMovedPiece(Move move);
 
     public abstract Collection<Move> calculateLegalMoves(final Chessboard board);
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Pieces)) {
+            return false;
+        }
+        final Pieces otherPiece = (Pieces) other;
+        return this.piecePosition == otherPiece.piecePosition && this.type == otherPiece.type &&
+               this.pieceAlliance == otherPiece.pieceAlliance && this.isFirstMove == otherPiece.isFirstMove;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.cachedHashCode;
+    }
+
+    private int computeHashCode() {
+        int result = this.type.hashCode();
+        result = 31 * result + this.pieceAlliance.hashCode();
+        result = 31 * result + this.piecePosition;
+        result = 31 * result + (this.isFirstMove ? 1 : 0);
+        return result;
+    }
 
     public void updatePosition() {
 
@@ -300,3 +336,4 @@ public abstract class Pieces {
     }
 
 }
+
