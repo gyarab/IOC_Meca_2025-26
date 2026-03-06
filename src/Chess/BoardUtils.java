@@ -53,6 +53,17 @@ public enum BoardUtils {
         } while(rowNumber % NUM_TILES_PER_ROW != 0);
         return Collections.unmodifiableList(Arrays.asList(row));
     }
+
+        public static Collection<Move> calculateAttacksOnTile(final int tile, final Collection<Move> moves) {
+
+        final List<Move> attacksMoves = new ArrayList<>();
+        for (final Move move : moves) {
+            if (move.getDestinationCoordinate() == tile) {
+                attacksMoves.add(move);
+            }
+        }
+        return Collections.unmodifiableList(attacksMoves);
+    }
     
 }
 
