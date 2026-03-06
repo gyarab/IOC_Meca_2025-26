@@ -168,7 +168,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         button2();
         button3();
         button4();
-        button5();
+        createButton5();
         initKeyBindings(this);
         board = new Chessboard(new Builder());
         currentColor = WHITE; // začíná bílý
@@ -986,7 +986,7 @@ private void update() {
         this.add(compButton);
     }
 
-private void button5() {
+private void createButton5() {
         javax.swing.JButton setUpButton = new javax.swing.JButton("Set position");
         setUpButton.setBounds(850, 300, 200, 55);
         setUpButton.setFont(new Font("Book Antiqua", Font.BOLD, 18));
@@ -1009,7 +1009,7 @@ private void button5() {
         component.getActionMap().put("setPosition", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                button5();
+                createButton5();
             }
         });
     }
@@ -1375,3 +1375,4 @@ private void button5() {
     }
 
 }
+
