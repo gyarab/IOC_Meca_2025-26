@@ -124,6 +124,13 @@ public abstract class Pieces {
         return type.getPieceValue();
     } 
 
+    public Collection<Move> getLegalMoves(Piece[][] boardPieces) {
+        Chessboard board = new Chessboard(new Builder());
+        System.out.println("Legální tahy jsou:" + board.getAllLegalMoves());
+        return board.getAllLegalMoves();
+
+    }
+
     public abstract int locationBonus();
 
     public abstract Pieces getMovedPiece(Move move);
@@ -336,4 +343,5 @@ public abstract class Pieces {
     }
 
 }
+
 
