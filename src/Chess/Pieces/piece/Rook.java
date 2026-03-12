@@ -50,24 +50,45 @@ public class Rook extends Pieces {
         return false;
 }
    
-    public Collection<Move> calculateLegalMoves(final Chessboard board) {
-        final List<Move> legalMoves = new ArrayList<>();
-        for (final MoveUtils.Line line : PRECOMPUTED_CANDIDATES.get(col)) {
-            for (final int candidateDestinationCoordinate : line.getLineCoordinates()) {
-                final Pieces[] pieceAtDestination = board.getPiece(candidateDestinationCoordinate);
-                if (pieceAtDestination == null) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+ @Override
+    public Collection<Move> calculateLegalMoves(Chessboard board) {
+
+        List<Move> legalMoves = new ArrayList<>();
+
+        int[][] directions = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+        };
+
+        for (int[] d : directions) {
+
+            int columns = this.pceCol;
+            int rows = this.pceRow;
+
+            while (true) {
+
+                columns += d[0];
+                rows += d[1];
+
+                if (columns < 0 || columns > 7 || rows < 0 || rows > 7) {
+                    break;
+                }
+
+                Piece target = board.getPiece(rows, columns);
+
+                if (target == null) {
+                    legalMoves.add(new Move(board, this, columns, rows));
                 } else {
-                    final Alliance pieceAlliance4 = pieceAtDestination.getPieceAllegiance();
-                    if (this.pieceAlliance != pieceAlliance4) {
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate,
-                                pieceAtDestination));
+
+                    if (target.color != this.color) {
+                        legalMoves.add(new Move(board, this, columns, rows));
                     }
+
                     break;
                 }
             }
         }
-        return Collections.unmodifiableList(legalMoves);
+
+        return legalMoves;
     }
 
     public int locationBonus() {
@@ -77,5 +98,6 @@ public class Rook extends Pieces {
     public Pieces getMovedPiece(Move move) {
       return activeP;   
     }   
+
 
 }
