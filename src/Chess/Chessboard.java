@@ -11,6 +11,7 @@ public final class Chessboard {
     public static final int MAX_ROW = 8;
     public static final int SQUARE_SIZE = 100;
     public static final int HALF_SQUARE_SIZE = SQUARE_SIZE / 2;
+    public static final int BOARD_SIZE = 64;
 
     private final Pieces[] boardPieces;
     private final int[] whitePieceCoordinates;
@@ -81,12 +82,6 @@ public final class Chessboard {
         sideToMove = (sideToMove == Chesswindowpanel.WHITE)
                 ? Chesswindowpanel.BLACK
                 : Chesswindowpanel.WHITE;
-    }
-
-    boolean isOpenFile(int col) {
-
-        return true;
-
     }
 
     /* =========================
@@ -274,3 +269,4 @@ public final class Chessboard {
         }
     }
 }
+
