@@ -237,7 +237,7 @@ public class ChessPositionSetter extends JDialog {
         switch (selectedType) {
             case KING:   p = new King(selectedColor, col, row, false); break;
             case QUEEN:  p = new Queen(selectedColor, col, row, false); break;
-            case ROOK:   p = new Rook(selectedColor, col); break;
+            case ROOK:   p = new Rook(selectedColor, col, row, false); break;
             case BISHOP: p = new Bishop(selectedColor, col, row, false); break;
             case KNIGHT: p = new Knight(selectedColor, col, row, false); break;
             default:     p = new Pawn(selectedColor, col, row, false);
@@ -342,18 +342,7 @@ public class ChessPositionSetter extends JDialog {
                     "Each side must have exactly one king!");
             return;
         }
-
-//            if (!parent.isValidPosition(
-//            resultPieces,
-//            turnColor,
-//            whiteCastleK, whiteCastleQ,
-//            blackCastleK, blackCastleQ)) {
-//
-//            JOptionPane.showMessageDialog(this,
-//            "This is not a valid position!");
-//        return;
-       // }
-
+        
         parent.boardPieces.clear();
         parent.simBoardPieces.clear();
         parent.boardPieces.addAll(resultPieces);
