@@ -9,6 +9,8 @@ package Chess;
  * @author mecova
  */
 import Chess.Pieces.piece.King;
+import Chess.Pieces.piece.Piece;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +18,7 @@ import java.util.List;
 
 public final class BlackPlayer extends Player {
 
-    public BlackPlayer(final Board board,
+    public BlackPlayer(final Chessboard board,
                        final King playerKing,
                        final Collection<Move> whiteStandardLegals,
                        final Collection<Move> blackStandardLegals) {

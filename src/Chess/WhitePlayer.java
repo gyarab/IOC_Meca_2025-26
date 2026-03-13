@@ -9,6 +9,7 @@ package Chess;
  * @author mecova
  */
 import Chess.Pieces.piece.King;
+import Chess.Pieces.piece.Piece;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

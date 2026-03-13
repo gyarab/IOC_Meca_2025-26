@@ -1,81 +1,107 @@
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
-import java.util.ArrayList;
+import Chess.Move.MoveFactory;
 
-public class MiniMax implements MoveStrategy {
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
+
+public final class MiniMax implements MoveStrategy {
 
     private final BoardEvaluator boardEvaluator;
     private final int searchDepth;
-    private long numBoardsEvaluated = 0;
+    private long numBoardsEvaluated;
+    private Chessboard board;
+    private FreqTableRow[] freqTable;
+    private int freqTableIndex;
 
-    public MiniMax(BoardEvaluator boardEvaluator, int searchDepth) {
-        this.boardEvaluator = new SimpleBoardEvaluator();
+    public MiniMax(final Chessboard board,final int searchDepth) {
+        this.board = board;
+        this.boardEvaluator = SimpleBoardEvaluator.get();
+        this.numBoardsEvaluated = 0;
         this.searchDepth = searchDepth;
     }
 
-    // ✅ metoda požadovaná rozhraním
-    @Override
-    public Move execute(Chessboard board, int depth) {
-
-        final long startTime = System.currentTimeMillis();
-        
-        Move bestMove = MoveFactory.getNullMove();; //because I don't know yet what is the best move and I need to create class MoveFactory in package Chess
-        
-        int highestSeenValue = Integer.MIN_VALUE;
-        
-        int lowestSeenValue = Integer.MAX_VALUE;
-        
-        int currentValue;
-        
-        System.out.println(board.currentPlayer() + " THINKING with depth = " + depth);
-        
-        int numMoves = board.currentPlayer().getLegalMoves().size();
-        
-        for(final Move move : board.currentPlayer().getLegalMoves()) {
-            
-            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
-            if(moveTransition.getMoveStatus().isDone()) {
-                
-                currentValue = board.currentPlayer().getAlliance().isWhite() ?
-                        min(moveTransition.getTransitionBoard(), depth - 1) : //black player is a minimizing player
-                        max(moveTransition.getTransitionBoard(), depth - 1); //white player is a maximing player
-                
-                
-                if(board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue) {
-                   highestSeenValue = currentValue;
-                   bestMove = move;
-                } else if (board.currentPlayer().getAlliance().isBlack() && currentValue <= lowestSeenValue) {
-                    lowestSeenValue = currentValue;
-                    bestMove = move;
-                }
-                
-            }
-            
-        }
-        
-        final long executionTime = System.currentTimeMillis() - startTime;
-        
-        return bestMove;
-    }
 
     @Override
     public String toString() {
         return "MiniMax";
     }
 
-    public int min(final Chessboard board, final int depth) {
+    @Override
+    public long getNumBoardsEvaluated() {
+        return this.numBoardsEvaluated;
+    }
 
-        if(depth == 0){ // || game over
+
+    @Override
+    public Move execute(final Chessboard board) {
+        final long startTime = System.currentTimeMillis();
+        Move bestMove = MoveFactory.getNullMove();
+        int highestSeenValue = Integer.MIN_VALUE;
+        int lowestSeenValue = Integer.MAX_VALUE;
+        int currentValue;
+        System.out.println(board.currentPlayer() + " THINKING with depth = " + this.searchDepth);
+        this.freqTable = new FreqTableRow[board.currentPlayer().getLegalMoves().size()];
+        this.freqTableIndex = 0;
+        int moveCounter = 1;
+        final int numMoves = board.currentPlayer().getLegalMoves().size();
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+            if (moveTransition.getMoveStatus().isDone()) {
+                final FreqTableRow row = new FreqTableRow(move);
+                this.freqTable[this.freqTableIndex] = row;
+                currentValue = board.currentPlayer().getAlliance().isWhite()
+                        ? min(moveTransition.getToBoard(), this.searchDepth - 1)
+                        : max(moveTransition.getToBoard(), this.searchDepth - 1);
+
+                System.out.println("\t" + toString() + " analyzing move (" + moveCounter + "/" + numMoves + ") " + move
+                        + " scores " + currentValue + " " + this.freqTable[this.freqTableIndex]);
+                this.freqTableIndex++;
+                if (board.currentPlayer().getAlliance().isWhite()
+                        && currentValue >= highestSeenValue) {
+                    highestSeenValue = currentValue;
+                    bestMove = move;
+                } else if (board.currentPlayer().getAlliance().isBlack()
+                        && currentValue <= lowestSeenValue) {
+                    lowestSeenValue = currentValue;
+                    bestMove = move;
+                }
+            } else {
+                System.out.println("\t" + this + " can't execute move (" + moveCounter + "/" + numMoves + ") " + move);
+            }
+            moveCounter++;
+        }
+        final long executionTime = System.currentTimeMillis() - startTime;
+        System.out.printf("%s SELECTS %s [#boards = %d time taken = %d ms, rate = %.1f\n", board.currentPlayer(),
+                bestMove, this.numBoardsEvaluated, executionTime, (1000 * ((double) this.numBoardsEvaluated / executionTime)));
+        long total = 0;
+        for (final FreqTableRow row : this.freqTable) {
+            if (row != null) {
+                total += row.getCount();
+            }
+        }
+        if (this.numBoardsEvaluated != total) {
+            System.out.println("somethings wrong with the # of boards evaluated!");
+        }
+        return bestMove;
+    }
+
+    private int min(final Chessboard board, final int depth) {
+
+        if (depth == 0) { // || game over
+            this.numBoardsEvaluated++;
+            this.freqTable[this.freqTableIndex].increment();
             return this.boardEvaluator.evaluate(board, depth);
         }
-        
+        if (isEndGameScenario(board)) {
+            return this.boardEvaluator.evaluate(board, depth);
+        }
         int lowestSeenValue = Integer.MAX_VALUE; //imposibly big number, that I am not going to evaluate
-        for(final Move move : board.currentPlayer().getLegalMoves()) {
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
-            if(moveTransition.getMoveStatus().isDone()) { //I need to create this method in class MoveStatus
-                final int currentValue = max(moveTransition.getTransitionBoard(), depth - 1); // I nedd to create this method in class MoveTransition
-                if(currentValue <= lowestSeenValue) {
+            if (moveTransition.getMoveStatus().isDone()) { //I need to create this method in class MoveStatus
+                final int currentValue = max(moveTransition.getToBoard(), depth - 1); // I nedd to create this method in class MoveTransition
+                if (currentValue <= lowestSeenValue) {
                     lowestSeenValue = currentValue;
                 }
             }
@@ -83,118 +109,56 @@ public class MiniMax implements MoveStrategy {
         return lowestSeenValue;
     }
 
-    public int max(final Chessboard board, final int depth) {
+    private int max(final Chessboard board, final int depth) {
 
-         if(depth == 0){ // || game over
+        if (depth == 0) { // || game over
+            this.numBoardsEvaluated++;
+            this.freqTable[this.freqTableIndex].increment();
             return this.boardEvaluator.evaluate(board, depth);
         }
-        
+
+        if (isEndGameScenario(board)) {
+            return this.boardEvaluator.evaluate(board, depth);
+        }
         int highestSeenValue = Integer.MIN_VALUE; //imposibly small number, that I am not going to evaluate
-        for(final Move move : board.currentPlayer().getLegalMoves()) {
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
-            if(moveTransition.getMoveStatus().isDone()) { //I need to create this method in class MoveStatus
-                final int currentValue = min(moveTransition.getTransitionBoard(), depth - 1); // I nedd to create this method in class MoveTransition
-                if(currentValue >= highestSeenValue) {
+            if (moveTransition.getMoveStatus().isDone()) { //I need to create this method in class MoveStatus
+                final int currentValue = min(moveTransition.getToBoard(), depth - 1); // I nedd to create this method in class MoveTransition
+                if (currentValue >= highestSeenValue) {
                     highestSeenValue = currentValue;
                 }
             }
         }
         return highestSeenValue;
     }
+    
+    private static boolean isEndGameScenario(final Chessboard board) {
+        return board.currentPlayer().isInCheckMate() || board.currentPlayer().isInStaleMate();
+    }
 
-    long starTime = System.currentTimeMillis();
+      private static class FreqTableRow {
 
-    Move calculatedBestMove = null;
+        private final Move move;
+        private final AtomicLong count;
 
-    int highestSeenValue = Integer.MIN_VALUE;
-    int lowestSeenValue = Integer.MAX_VALUE;
-    int currentValue;
+        FreqTableRow(final Move move) {
+            this.count = new AtomicLong();
+            this.move = move;
+        }
 
+        long getCount() {
+            return this.count.get();
+        }
+
+        void increment() {
+            this.count.incrementAndGet();
+        }
 
         @Override
-    public long getNumBoardsEvaluated() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    // interní verze s barvou
-    public Chessboard.Move execute(Chessboard board, int color) {
-
-        Chessboard.Move bestMove = null;
-        int bestValue = (color == Chesswindowpanel.WHITE)
-                ? Integer.MIN_VALUE
-                : Integer.MAX_VALUE;
-
-        for (Chessboard.Move move : board.getLegalMoves(color)) {
-            board.movePiece(move);
-
-            int value = minimax(
-                    board,
-                    searchDepth - 1,
-                    color == Chesswindowpanel.BLACK
-            );
-
-            board.undoMove();
-
-            if (color == Chesswindowpanel.WHITE) {
-                if (value > bestValue) {
-                    bestValue = value;
-                    bestMove = move;
-                }
-            } else {
-                if (value < bestValue) {
-                    bestValue = value;
-                    bestMove = move;
-                }
-            }
+        public String toString() {
+            return BoardUtils.INSTANCE.getPositionAtCoordinate(this.move.getCurrentCoordinate())
+                    + BoardUtils.INSTANCE.getPositionAtCoordinate(this.move.getDestinationCoordinate()) + " : " + this.count;
         }
-
-        return bestMove;
-    }
-
-    private int minimax(Chessboard board, int depth, boolean maximizing) {
-        numBoardsEvaluated++;
-
-        if (depth == 0) {
-            return board.getEvaluation();
-        }
-
-        int color = maximizing
-                ? Chesswindowpanel.WHITE
-                : Chesswindowpanel.BLACK;
-
-        ArrayList<Chessboard.Move> moves = board.getLegalMoves(color);
-
-        if (moves.isEmpty()) {
-            if (board.isKingInCheck(color)) {
-                return maximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-            }
-            return 0;
-        }
-
-        int best = maximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-
-        for (Chessboard.Move move : moves) {
-            board.movePiece(move);
-            int value = minimax(board, depth - 1, !maximizing);
-            board.undoMove();
-
-            best = maximizing
-                    ? Math.max(best, value)
-                    : Math.min(best, value);
-        }
-
-        return best;
-    }
-
-    @Override
-    public long getNumBoardsEvaluated() {
-        return numBoardsEvaluated;
-    }
-
-//    @Override
-//    public String toString() {
-//        return "MiniMax{" +
-//                "boardEvaluator=" + boardEvaluator +
-//                '}';
-//    }
+    }   
 }

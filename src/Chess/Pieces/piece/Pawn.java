@@ -7,13 +7,16 @@ package Chess.Pieces.piece;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
  * @author Admin
  */
-public class Pawn extends Pieces{
+public class Pawn extends Piece{
     
     public boolean hasMoved = false;
     
@@ -67,7 +70,7 @@ public class Pawn extends Pieces{
         }
         //En Passant
         if(Math.abs(targetCol-pceCol) == 1 && targetRow == pceRow + moveValue){
-            for(Pieces pieces:Chesswindowpanel.simPieces){
+            for(Piece pieces:Chesswindowpanel.simPieces){
                 if(pieces.col == targetCol && pieces.row == pceRow && pieces.twoStepped == true){
                     hittingP = pieces; //If there is a piece that it's col is equal to the targetCol
                     return true; 
@@ -85,12 +88,25 @@ public class Pawn extends Pieces{
     }
 
     @Override
-    public Pieces getMovedPiece(Move move) {
+    public Piece getMovedPiece(Move move) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        
+
+        List<Move> legalMoves = new ArrayList<>();
+
+        int direction = (color == Chesswindowpanel.WHITE) ? -1 : 1;
+
+        int row = pceRow + direction;
+
+        if (board.getPiece(row, pceCol) == null) {
+            legalMoves.add(new Move(board, this, pceCol, row));
+        }
+
+        return legalMoves;
+
     }
  }

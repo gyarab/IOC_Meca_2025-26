@@ -4,6 +4,9 @@
  */
 package Chess;
 
+import Chess.Pieces.piece.King;
+import Chess.Pieces.piece.Piece;
+import Chess.Pieces.piece.Types;
 import java.util.*;
 
 /**
@@ -30,9 +33,35 @@ public enum BoardUtils {
     public static final List<Boolean> SIXTH_ROW = initRow(40);
     public static final List<Boolean> SEVENTH_ROW = initRow(48);
     public static final List<Boolean> EIGHTH_ROW = initRow(56);
-    
+    public static final List<String> ALGEBRAIC_NOTATION = initializeAlgebraicNotation();
+    public static final Map<String, Integer> POSITION_TO_COORDINATE = initializePositionToCoordinateMap();
+
+    public static final int START_TILE_INDEX = 0;
     public static final int NUM_TILES_PER_ROW = 8;
     public static final int NUM_TILES = 64;
+
+     // IMPROVED Rook tables - favor central files and 7th rank
+    public final static int[] WHITE_ROOK_PREFERRED_COORDINATES = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        5, 10, 10, 10, 10, 10, 10, 5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5, //Central files bonus
+        -5, 0, 0, 0, 0, 0, 0, -5, // 7th rank extra strong
+        0, 0, 0, 5, 5, 0, 0, 0 // d/e files preferred
+    };
+
+    public final static int[] BLACK_ROOK_PREFERRED_COORDINATES = {
+        0, 0, 0, 5, 5, 0, 0, 0, // d/e files preferred
+        -5, 0, 0, 0, 0, 0, 0, -5, // 2nd rank extra strong
+        -5, 0, 0, 0, 0, 0, 0, -5, // Central files bonus
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        5, 10, 10, 10, 10, 10, 10, 5,
+        0, 0, 0, 5, 5, 0, 0, 0 // Back rank connection bonus
+    };
     
      private static List<Boolean> initColumn(int columnNumber) {
         final Boolean[] column = new Boolean[NUM_TILES];
@@ -65,5 +94,54 @@ public enum BoardUtils {
         return Collections.unmodifiableList(attacksMoves);
     }
     
+    public static boolean isKingPawnTrap(final Chessboard board,
+            final King king,
+            final int frontTile) {
+        final Piece piece = board.getPiece(frontTile, frontTile);
+
+        return piece != null
+                && piece.getPieceType() == Types.PAWN
+                && piece.getPieceAllegiance() != king.getPieceAllegiance();
+    }
+
+    public static int mvvlva(final Move move) {
+        if (!move.isAttack()) {
+            return 0;
+        }
+        final int victimValue = move.getAttackedPiece().getPieceValue();
+        final int attackerValue = move.getMovedPiece().getPieceValue();
+        return (victimValue * 10) - attackerValue + (move.getMovedPiece().getPieceType() == Types.PAWN ? 10 : 0);
+    }
+
+    private static List<String> initializeAlgebraicNotation() {
+        return List.of("a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+                "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+                "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+                "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+                "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+                "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+                "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+                "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1");
+    }
+
+    private static Map<String, Integer> initializePositionToCoordinateMap() {
+        final Map<String, Integer> positionToCoordinate = new HashMap<>();
+        for (int i = START_TILE_INDEX; i < NUM_TILES; i++) {
+            positionToCoordinate.put(ALGEBRAIC_NOTATION.get(i), i);
+        }
+        return Collections.unmodifiableMap(positionToCoordinate);
+    }
+
+    public static boolean isValidTileCoordinate(final int coordinate) {
+        return coordinate >= START_TILE_INDEX && coordinate < NUM_TILES;
+    }
+
+    public int getCoordinateAtPosition(final String position) {
+        return POSITION_TO_COORDINATE.get(position);
+    }
+
+    public String getPositionAtCoordinate(final int coordinate) {
+        return ALGEBRAIC_NOTATION.get(coordinate);
+    }
 }
 

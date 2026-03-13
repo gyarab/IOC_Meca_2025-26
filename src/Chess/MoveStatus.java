@@ -25,6 +25,7 @@ public enum MoveStatus {
                 return false;
             }
         };
+        public abstract boolean isDone();
     }
 
 

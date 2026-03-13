@@ -13,7 +13,7 @@ import Chess.Pieces.piece.Bishop;
 import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Knight;
 import Chess.Pieces.piece.Pawn;
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 import Chess.Pieces.piece.Queen;
 import Chess.Pieces.piece.Rook;
 import Chess.Pieces.piece.Types;
@@ -51,7 +51,7 @@ public class ChessPositionSetter extends JDialog {
     
     
 
-    private final ArrayList<Pieces> resultPieces = new ArrayList<>();
+    private final ArrayList<Piece> resultPieces = new ArrayList<>();
 
     public ChessPositionSetter(Chesswindowpanel parent) {
         super((Frame) null, "Set Chess Position", true);
@@ -233,7 +233,7 @@ public class ChessPositionSetter extends JDialog {
         board[row][col].setText(getSymbol());
         currentCounts.put(selectedType, currentCounts.get(selectedType) + 1);
 
-        Pieces p;
+        Piece p;
         switch (selectedType) {
             case KING:   p = new King(selectedColor, col, row, false); break;
             case QUEEN:  p = new Queen(selectedColor, col, row, false); break;
@@ -268,7 +268,7 @@ public class ChessPositionSetter extends JDialog {
 
     private void removePiece(int row, int col) {
         JButton b = board[row][col];
-        Pieces p = (Pieces) b.getClientProperty("piece");
+        Piece p = (Piece) b.getClientProperty("piece");
 
         if (p == null) 
             return;
@@ -299,9 +299,9 @@ public class ChessPositionSetter extends JDialog {
     }
     
     private boolean isKingInCheckInPosition(int kingColor) {
-    Pieces king = null;
+    Piece king = null;
 
-    for (Pieces p : resultPieces) {
+    for (Piece p : resultPieces) {
         if (p.type == Types.KING && p.color == kingColor) {
             king = p;
             break;
@@ -310,7 +310,7 @@ public class ChessPositionSetter extends JDialog {
 
     if (king == null) return true; // safe
 
-    for (Pieces p : resultPieces) {
+    for (Piece p : resultPieces) {
         if (p.color != kingColor) {
             if (p.canMove(king.col, king.row)) {
                 return true;

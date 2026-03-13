@@ -2,6 +2,8 @@ package Chess;
 
 import Chess.Pieces.piece.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -11,8 +13,10 @@ public final class Chessboard {
     public static final int MAX_ROW = 8;
     public static final int SQUARE_SIZE = 100;
     public static final int HALF_SQUARE_SIZE = SQUARE_SIZE / 2;
+    public static final int BOARD_SIZE = 64;
 
-    private final Pieces[] boardPieces;
+    private final Alliance alliance = Alliance.WHITE;
+    private final Piece[] boardPieces;
     private final int[] whitePieceCoordinates;
     private final int[] blackPieceCoordinates;
     private final WhitePlayer whiteplayer;
@@ -20,24 +24,26 @@ public final class Chessboard {
     private final Player currentPlayer;
     private final Pawn enPassantPawn;
 
-    private int evaluation; //actual value of position
-    private Pieces[][] board = new Pieces[MAX_ROW][MAX_COL];
-    private ArrayList<Pieces> pieces = new ArrayList<>();
+    private int evaluation; // actual value of position
+    private Piece[][] board = new Piece[MAX_ROW][MAX_COL];
+    private ArrayList<Piece> pieces = new ArrayList<>();
     private Stack<Move> moveHistory = new Stack<>();
 
     private static final Chessboard STANDARD_BOARD = createStandardBoardImpl();
 
     private int sideToMove = Chesswindowpanel.WHITE;
 
-    Chessboard(Builder builder) {
+    public Chessboard(Builder builder) {
         this.boardPieces = builder.boardPieces;
         this.whitePieceCoordinates = calculateActiveIndexes(boardPieces, Alliance.WHITE);
         this.blackPieceCoordinates = calculateActiveIndexes(boardPieces, Alliance.BLACK);
         this.enPassantPawn = builder.enPassantPawn;
         final Collection<Move> whiteStandardMoves = calculateLegalMoves(boardPieces, this.whitePieceCoordinates);
         final Collection<Move> blackStandardMoves = calculateLegalMoves(boardPieces, this.blackPieceCoordinates);
-        this.whiteplayer = new WhitePlayer(this, establishKing(this.whitePieceCoordinates, this.boardPieces), whiteStandardMoves, blackStandardMoves);
-        this.blackPlayer = new BlackPlayer(this, establishKing(this.blackPieceCoordinates, this.boardPieces), whiteStandardMoves, blackStandardMoves);
+        this.whiteplayer = new WhitePlayer(this, establishKing(this.whitePieceCoordinates, this.boardPieces),
+                whiteStandardMoves, blackStandardMoves);
+        this.blackPlayer = new BlackPlayer(this, establishKing(this.blackPieceCoordinates, this.boardPieces),
+                whiteStandardMoves, blackStandardMoves);
         this.currentPlayer = builder.nextMoveMaker.choosePlayerByAlliance(this.whiteplayer, this.blackPlayer);
     }
 
@@ -57,15 +63,11 @@ public final class Chessboard {
         return this.currentPlayer;
     }
 
-    public Pieces[] getBoardPieces() {
+    public Piece[] getBoardPieces() {
         return this.boardPieces;
     }
 
-    public Pieces[] getPieces() {
-        return this.boardPieces;
-    }
-
-    public Pieces[] getBoardCopy() {
+    public Piece[] getBoardCopy() {
         return this.boardPieces.clone();
     }
 
@@ -89,11 +91,14 @@ public final class Chessboard {
 
     }
 
-    /* =========================
-       GETTERS
-       ========================= */
-    public Collection<Pieces> getAllPieces() {
-        final List<Pieces> allPieces = new ArrayList<>(this.whitePieceCoordinates.length + this.blackPieceCoordinates.length);
+    /*
+     * =========================
+     * GETTERS
+     * =========================
+     */
+    public Collection<Piece> getAllPieces() {
+        final List<Piece> allPieces = new ArrayList<>(
+                this.whitePieceCoordinates.length + this.blackPieceCoordinates.length);
         for (final int index : this.whitePieceCoordinates) {
             allPieces.add(this.boardPieces[index]);
         }
@@ -103,41 +108,59 @@ public final class Chessboard {
         return Collections.unmodifiableList(allPieces);
     }
 
-    public Pieces[] getPiece(int sq) {
+    public Piece[] getPiece(int sq) {
         return board[sq];
     }
 
-    /* =========================
-       BOARD SETUP
-       ========================= */
-    public void setPieces(ArrayList<Pieces> newPieces) {
+    public Piece getPiece(int col, int row) {
+
+        if (row < 0 || row >= MAX_ROW || col < 0 || col >= MAX_COL) {
+            return null;
+        }
+        return board[row][col];
+    }
+
+    public Alliance getPieceAllegiance() {
+        return alliance;
+    }
+
+    /*
+     * =========================
+     * BOARD SETUP
+     * =========================
+     */
+    public void setPieces(ArrayList<Piece> newPieces) {
         pieces = newPieces;
         rebuildBoard();
     }
 
     private void rebuildBoard() {
-        board = new Pieces[MAX_ROW][MAX_COL];
-        for (Pieces p : pieces) {
+        board = new Piece[MAX_ROW][MAX_COL];
+        for (Piece p : pieces) {
             board[p.row][p.col] = p;
         }
     }
 
-    /* =========================
-       MOVE / UNDO
-       ========================= */
+    /*
+     * =========================
+     * MOVE / UNDO
+     * =========================
+     */
     private final PSQT psqt = new PSQT();
 
     public int getEvaluation() {
         return evaluation;
     }
 
-    /* =========================
-       CHECK
-       ========================= */
+    /*
+     * =========================
+     * CHECK
+     * =========================
+     */
     public boolean isKingInCheck(int color) {
-        Pieces king = null;
+        Piece king = null;
 
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p.color == color && p.type == Types.KING) {
                 king = p;
                 break;
@@ -148,7 +171,7 @@ public final class Chessboard {
 
         }
 
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p.color != color && p.canMove(king.col, king.row)) {
                 return true;
             }
@@ -158,23 +181,23 @@ public final class Chessboard {
 
     public void initializeEvaluation() {
         evaluation = 0;
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             int sq = p.row * 8 + p.col;
             if (!p.isWhite()) {
                 sq ^= 56;
             }
 
             evaluation += p.isWhite()
-                    ? psqt.getPieceTableValue(p.getType(), sq)
-                    : -psqt.getPieceTableValue(p.getType(), sq);
+                    ? psqt.getPieceTableValue(p.getType(), sq, sq)
+                    : -psqt.getPieceTableValue(p.getType(), sq, sq);
         }
     }
 
     private static Chessboard createStandardBoardImpl() {
         final Builder builder = new Builder();
-        //Black layout
-        //White layout
-        //return builder.build();
+        // Black layout
+        // White layout
+        // return builder.build();
         return null;
     }
 
@@ -184,7 +207,7 @@ public final class Chessboard {
                 .collect(Collectors.toList());
     }
 
-    private Collection<Move> calculateLegalMoves(final Pieces[] boardConfig,
+    private Collection<Move> calculateLegalMoves(final Piece[] boardConfig,
             final int[] pieces) {
         final Collection<Move> legalsMove = new ArrayList<>();
         for (final int piece_index : pieces) {
@@ -194,50 +217,72 @@ public final class Chessboard {
         return legalsMove;
     }
 
-    private static int[] calculateActiveIndexes(final Pieces[] boardConfig, final Alliance alliance) {
+    //
+    // private Collection<Move> calculateLegalMoves(Alliance alliance) {
+    //
+    // List<Move> legalMoves = new ArrayList<>();
+    //
+    // for(int i = 0; i < 64; i++) {
+    //
+    // Piece piece = board[i];
+    //
+    // if(piece != null && piece.getPieceAllegiance() == alliance) {
+    //
+    // legalMoves.addAll(piece.calculateLegalMoves(this));
+    //
+    // }
+    //
+    // }
+    //
+    // return legalMoves;
+    // }
+
+    private static int[] calculateActiveIndexes(final Piece[] boardConfig, final Alliance alliance) {
 
         final int[] result = new int[boardConfig.length];
         int count = 0;
         for (int idx = 0; idx < boardConfig.length; idx++) {
-            final Pieces piece = boardConfig[idx];
-            if (piece != null && piece.getPieceAllegiance() == alliance) { // I need to create this method in class Pieces
+            final Piece piece = boardConfig[idx];
+            if (piece != null && piece.getPieceAllegiance() == alliance) { // I need to create this method in class
+                                                                           // Pieces
                 result[count++] = idx;
             }
         }
         return Arrays.copyOf(result, count);
     }
 
-    private static King establishKing(final int[] activeIndexes, final Pieces[] boardConfig) {
+    private static King establishKing(final int[] activeIndexes, final Piece[] boardConfig) {
 
         for (final int index : activeIndexes) {
-            final Pieces piece = boardConfig[index];
-            if (piece.getPieceType() == Pieces.PieceType.KING) {
+            final Piece piece = boardConfig[index];
+            if (piece.getPieceType() == Types.KING) {
                 return (King) piece;
             }
         }
-        throw new RuntimeException("No king found for player!");
+        // throw new RuntimeException("No king found for player!");
+        return null; // TODO : more work here
     }
 
     static int movePiece(Move bestMove) {
-        return 0; //TODO: more work here
+        return 0; // TODO: more work here
     }
 
     public static class Builder {
 
-        Pieces[] boardPieces;
+        Piece[] boardPieces;
         Alliance nextMoveMaker;
         Pawn enPassantPawn;
 
         public Builder() {
-            this.boardPieces = new Pieces[BoardUtils.NUM_TILES];
+            this.boardPieces = new Piece[BoardUtils.NUM_TILES];
         }
 
-        public Builder setBoardConfig(final Pieces[] boardConfig) {
+        public Builder setBoardConfig(final Piece[] boardConfig) {
             this.boardPieces = boardConfig;
             return this;
         }
 
-        public Builder setPiece(final Pieces piece) {
+        public Builder setPiece(final Piece piece) {
             this.boardPieces[piece.getPiecePosition()] = piece;
             return this;
         }
@@ -252,14 +297,36 @@ public final class Chessboard {
             return this;
         }
 
-        public Builder build() {
+        public Builder setBoardConfiguration(Piece[] newBoardConfig) {
+            this.boardPieces = newBoardConfig;
+            return this;
+        }
+
+        public Chessboard build() {
             return new Chessboard(this);
         }
+
+        // public Chessboard execute() {
+        //
+        // Piece[][] newBoard = board.clone();
+        //
+        // newBoard[movedPiece.getPiecePosition()] = null;
+        //
+        // newBoard[destinationCoordinate]
+        // = movedPiece.getMovedPiece(this);
+        //
+        // return new Chessboard.Builder()
+        // .setBoardConfiguration(newBoard)
+        // .setMoveMaker(board.currentPlayer().getOpponent().getAlliance())
+        // .build();
+        // }
     }
 
-    /* =========================
-       DRAW
-       ========================= */
+    /*
+     * =========================
+     * DRAW
+     * =========================
+     */
     public void draw(Graphics2D g2) {
         int c = 0;
         for (int r = 0; r < MAX_ROW; r++) {

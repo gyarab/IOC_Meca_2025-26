@@ -4,7 +4,7 @@
  */
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 import java.util.List;
 
 /**
@@ -55,7 +55,7 @@ public final class KingSafetyAnalyzer {
 
     public int calculateKingTropism(final Player player) {
         final int playerKingSquare = player.getPlayerKing().getPiecePosition();
-        Pieces closestPiece = null;
+        Piece closestPiece = null;
         int closestDistance = Integer.MAX_VALUE;
         for (final Move move : player.getOpponent().getLegalMoves()) {
             final int currentDistance = calculateChebyshevDistance(playerKingSquare, move.getDestinationCoordinate()); // I need to create this method in class Move
@@ -88,10 +88,10 @@ public final class KingSafetyAnalyzer {
 
     private static class KingDistance {
 
-        final Pieces enemyPiece;
+        final Piece enemyPiece;
         final int distance;
 
-        KingDistance(final Pieces enemyDistance,
+        KingDistance(final Piece enemyDistance,
                 final int distance) {
             this.enemyPiece = enemyDistance;
             this.distance = distance;

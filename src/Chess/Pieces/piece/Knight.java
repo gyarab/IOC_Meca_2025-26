@@ -7,13 +7,16 @@ package Chess.Pieces.piece;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
  * @author Admin
  */
-public class Knight extends Pieces {
+public class Knight extends Piece {
     
     public Knight(int color, int col, int row,final boolean isFirstMove) {
         super(color, col, row, true);
@@ -48,12 +51,36 @@ public class Knight extends Pieces {
     }
 
     @Override
-    public Pieces getMovedPiece(Move move) {
+    public Piece getMovedPiece(Move move) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        
+         List<Move> legalMoves = new ArrayList<>();
+
+        int[][] moves = {
+            {2, 1}, {1, 2}, {-1, 2}, {-2, 1},
+            {-2, -1}, {-1, -2}, {1, -2}, {2, -1}
+        };
+
+        for (int[] m : moves) {
+
+            int col = pceCol + m[0];
+            int row = pceRow + m[1];
+
+            if (col < 0 || col > 7 || row < 0 || row > 7) {
+                continue;
+            }
+
+            Piece target = board.getPiece(row, col);
+
+            if (target == null || target.color != this.color) {
+                legalMoves.add(new Move(board, this, col, row));
+            }
+        }
+
+        return legalMoves;
     }
   }

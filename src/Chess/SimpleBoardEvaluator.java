@@ -8,7 +8,7 @@ package Chess;
  *
  * @author mecova
  */
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 
 import java.util.List;
 import java.util.Map;
@@ -141,9 +141,9 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         int score = 0;
         for (final Move move : player.getLegalMoves()) {
             if (move.isAttack()) { //I need to create a method isAttack() in class Move (package Chess)
-                final Pieces mover = move.getMovedPiece(); //I need to create this method in class Chess.Move
-                final Pieces victim = move.getAttackedPiece(); //I need to create this method in class Chess.Move
-                if (move.getPieceValue() <= victim.getPieceValue()) { //I need to create this method in two classes: Move and Pieces
+                final Piece mover = move.getMovedPiece(); //I need to create this method in class Chess.Move
+                final Piece victim = move.getAttackedPiece(); //I need to create this method in class Chess.Move
+                if (mover.getPieceValue() <= victim.getPieceValue()) { //I need to create this method in two classes: Move and Piece
                     score += 2;
                 }
             }
@@ -157,7 +157,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         int knightCount = 0;
         int pawnCount = 0;
         for (final int index : player.getActivePieces()) {
-            final Pieces p = player.getBoard().getPiece(index);
+            final Piece p = player.getBoard().getPiece(index, index);
             score += p.getPieceValue() + p.locationBonus(); //I need to create this methods
             switch (p.getPieceType()) {
                 case BISHOP:
@@ -190,7 +190,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         int penalty = 0;
         final Chessboard board = player.getBoard();
         for (final int pos : player.getActivePieces()) {
-            final Pieces piece = board.getPiece(pos);
+            final Piece piece = board.getPiece(pos,pos);
             //Find cheapest attacker
             int cheapestAttacker = Integer.MAX_VALUE;
             boolean isAttacked = false;

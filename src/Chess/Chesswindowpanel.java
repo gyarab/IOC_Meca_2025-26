@@ -1,16 +1,16 @@
- /*
+/*
   * To change this license header, choose License Headers in Project Properties.
   * To change this template file, choose Tools | Templates
   * and open the template in the editor.
-  */
+ */
 package Chess;
 
-import Chess.Chessboard.Builder;
+import Chess.Move.MoveFactory;
 import Chess.Pieces.piece.Bishop;
 import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Knight;
 import Chess.Pieces.piece.Pawn;
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 import Chess.Pieces.piece.Queen;
 import Chess.Pieces.piece.Rook;
 import Chess.Pieces.piece.Types;
@@ -35,29 +35,35 @@ import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import java.awt.MenuBar;
 import javax.swing.SwingUtilities;
 
 /**
  *
  * @author Admin
  */
-public class Chesswindowpanel extends JPanel implements Runnable {
+public final class Chesswindowpanel extends JPanel implements Runnable {
 
-    public static final int WIDTH = 1100;
-    public static final int HEIGHT = 810;
+    /**
+     *
+     */
+    public static final int screenWidth = 1100;
+    public static final int screenHeight = 810;
     final int FPS = 60;
+    KeyHandler keyH = new KeyHandler();
     Thread gameThread;
-    Chessboard board = new Chessboard(new Builder());
+    Chessboard board = Chessboard.createStandardBoard();
     Mouse mouse = new Mouse();
     Move bestMove;
 
     //Pieces
-    public static ArrayList<Pieces> pieces = new ArrayList<>();
-    public static ArrayList<Pieces> simPieces = new ArrayList<>();
-    ArrayList<Pieces> promotedP = new ArrayList<>();
-    Pieces activeP, checkingP; //I use this to handle the piece that the player is currently holding
-    public static Pieces castlingP;
+    public static ArrayList<Piece> pieces = new ArrayList<>();
+    public static ArrayList<Piece> simPieces = new ArrayList<>();
+    public static ArrayList<Piece> boardPieces = new ArrayList<>();
+    public static ArrayList<Piece> simBoardPieces = new ArrayList<>();
+    ArrayList<Piece> promotedP = new ArrayList<>();
+    Piece activeP;
+    Piece checkingP; //I use this to handle the piece that the player is currently holding
+    public static Piece castlingP;
     //Color
     public static final int WHITE = 0;
     public static final int BLACK = 1;
@@ -65,8 +71,6 @@ public class Chesswindowpanel extends JPanel implements Runnable {
 
     //Number of moves with the same piece
     private int count;
-
-    private Chessboard chessboard;
 
     //BOOLEANS
     boolean canMove;
@@ -89,15 +93,15 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     }
 
     // Vrátí figuru, kterou hráč právě drží (aktivníP)
-    public Pieces getSelectedPiece() {
+    public Piece getSelectedPiece() {
         return activeP;
     }
 
-    public ArrayList<Pieces> getPieces() {
+    public ArrayList<Piece> getPieces() {
         return pieces;
     }
 
-    public ArrayList<Pieces> getSimPieces() {
+    public ArrayList<Piece> getSimPieces() {
         return simPieces;
     }
 
@@ -112,7 +116,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     }
 
     // Vrátí figuru, která aktuálně ohrožuje krále (pro šachové hlášení)
-    public Pieces getCheckingPiece() {
+    public Piece getCheckingPiece() {
         return checkingP;
     }
 
@@ -131,20 +135,20 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         return draw;
     }
 
-    private int getPieceTableValue(Types type, int sq) {
+    private int getPieceTableValue(Types type, int col, int row) {
         switch (type) {
             case KNIGHT:
-                return PSQT.KNIGHT_TABLE[sq];
+                return PSQT.KNIGHT_TABLE[col][row];
             case KING:
-                return PSQT.KING_TABLE[sq];
+                return PSQT.KING_TABLE[col][row];
             case QUEEN:
-                return PSQT.QUEEN_TABLE[sq];
+                return PSQT.QUEEN_TABLE[col][row];
             case ROOK:
-                return PSQT.ROOK_TABLE[sq];
+                return PSQT.ROOK_TABLE[col][row];
             case BISHOP:
-                return PSQT.BISHOP_TABLE[sq];
+                return PSQT.BISHOP_TABLE[col][row];
             case PAWN:
-                return PSQT.PAWN_TABLE[sq];
+                return PSQT.PAWN_TABLE[col][row];
             default:
                 return 0;
         }
@@ -157,44 +161,73 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     private final Map<String, Integer> positionHistory = new HashMap<>();
 
     public Chesswindowpanel() {
-        setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.black);
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setBackground(Color.black);
+        this.setDoubleBuffered(true);
+        this.addKeyListener(keyH);
+        this.setFocusable(true);
         addMouseMotionListener(mouse);
         addMouseListener(mouse);
         setUpInitialPosition();
         //zavolat initializeEvaluation
         copyPieces(pieces, simPieces);
-        createButton();
-        createButton2();
-        createButton3();
-        createButton4();
-        createButton5();
+        initButtons();
         initKeyBindings(this);
-        board = new Chessboard(new Builder());
+        checkComputerColor();
+        board = Chessboard.createStandardBoard();
         currentColor = WHITE; // začíná bílý
-
-        // Inicializace bestMove až po inicializaci board a currentColor
-        //    bestMove = (Chessboard.Move) ai.execute(board, getCurrentColor());
     }
 
     // Spustí AI tah pro aktuálního hráče
     public void performAIMove() {
-        MiniMax ai = new MiniMax(new BoardEvaluator() {
-            @Override
-            public int evaluate(Chessboard board, int depth) {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
-        }, 3); // hloubka 3
-        Move bestMove = (Move) ai.execute(board, 3);
 
-        if (bestMove != null) {
-            board.movePiece(bestMove);
-            System.out.println("AI provedl tah: " + bestMove.piece + " na ["
-                    + bestMove.targetRow + "," + bestMove.targetCol + "]");
+        if (gameover || stalemate || draw) {
+            return;
         }
 
-        // Přepnutí hráče
-        currentColor = (currentColor == WHITE) ? BLACK : WHITE;
+        board = buildBoardFromGUI();
+
+        MiniMax ai = new MiniMax(board, 3);
+
+        Move bestMove = ai.execute(board);
+
+        if (bestMove == null || bestMove == MoveFactory.getNullMove()) {
+            System.out.println("AI returned NULL move!");
+            return;
+        }
+
+        MoveTransition transition = board.currentPlayer().makeMove(bestMove);
+
+        if (transition.getMoveStatus().isDone()) {
+
+            board = transition.getToBoard();
+
+            currentColor = (currentColor == WHITE) ? BLACK : WHITE;
+
+        } else {
+            System.out.println("AI move invalid: " + bestMove);
+        }
+
+        repaint();
+    }
+
+    public Chessboard buildBoardFromGUI() {
+
+        Chessboard.Builder builder = new Chessboard.Builder();
+
+        for (Piece p : pieces) {
+            if (p != null) {
+                builder.setPiece(p);
+            }
+        }
+
+        if (currentColor == WHITE) {
+            builder.setMoveMaker(Alliance.WHITE);
+        } else {
+            builder.setMoveMaker(Alliance.BLACK);
+        }
+
+        return builder.build();
     }
 
     // Tento kód můžeš zavolat třeba při stisku tlačítka "AI tah"
@@ -206,6 +239,57 @@ public class Chesswindowpanel extends JPanel implements Runnable {
     public void launchGame() {
         gameThread = new Thread(this);
         gameThread.start();
+    }
+
+    @Override
+    public void run() {
+
+        // Game  LOOP
+        double drawInterval = 1000000000 / FPS; //0.0166666 seconds
+        double nextDrawTime = System.nanoTime() + drawInterval;
+
+        long lastTime = System.nanoTime();
+        long currentTime;
+        long timer = 0;
+        long drawCount = 0;
+
+        while (gameThread != null) {
+
+            currentTime = System.nanoTime();
+
+            update();
+
+            repaint();
+
+            //počítání FPS
+            drawCount++;
+            timer += (currentTime - lastTime);
+            lastTime = currentTime;
+
+            if (timer >= 1000000000) { // 1 sekunda
+                System.out.println("FPS: " + drawCount);
+                drawCount = 0;
+                timer = 0;
+            }
+
+            try {
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime = remainingTime / 1000000;
+
+                if (remainingTime < 0) {
+                    remainingTime = 0;
+                } //BECAUSE WE ALREADY USED THE ALLOCATED TIME
+
+                Thread.sleep((long) remainingTime);
+
+                nextDrawTime += drawInterval;
+
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+
+        }
+
     }
 
     public void setWhiteCastleK(boolean value) {
@@ -239,17 +323,17 @@ public class Chesswindowpanel extends JPanel implements Runnable {
         addPieceCorrectly(new King(BLACK, 1, 6, false));
     }
 
-    public void copyPieces(ArrayList<Pieces> src, ArrayList<Pieces> dst) {
+    public void copyPieces(ArrayList<Piece> src, ArrayList<Piece> dst) {
         dst.clear();
         for (int i = 0; i < src.size(); i++) {
             dst.add(src.get(i));
         }
     }
 
-    private void addPieceCorrectly(Pieces newPiece) {
+    private void addPieceCorrectly(Piece newPiece) {
         //If a king is added, it is checked whether a king of the same suit already exists
         if (newPiece.type == Types.KING) {
-            for (Pieces p : pieces) {
+            for (Piece p : board.getAllPieces()) {
                 if (p.type == Types.KING && p.color == newPiece.color) {
                     System.err.println("⚠ You cannot add a second king of the same suit!");
                     return; //Stop adding
@@ -292,31 +376,7 @@ public class Chesswindowpanel extends JPanel implements Runnable {
 
     }
 
-    @Override
-    public void run() {
-
-        // Game  LOOP
-        double drawInterval = 1000000000 / FPS;
-        double delta = 0;
-        long lastTime = System.nanoTime();
-        long currentTime;
-
-        while (gameThread != null) {
-            currentTime = System.nanoTime();
-
-            delta += (currentTime - lastTime) / drawInterval;
-            lastTime = currentTime;
-
-            if (delta >= 1) {
-                update();
-                repaint();
-                delta--;
-            }
-
-        }
-
-    }
-private void update() {
+    private void update() {
 
         if (promotion) { //I basically stop the game during the promotion, so I cannot pick up other pieces, until I finish this promotion process
             promoting();
@@ -326,11 +386,11 @@ private void update() {
                 //If the activeP (active piece) is null, check if you can pick up a piece
                 if (activeP == null) {
                     //scanning this simPieces Arraylist<>()
-                    for (Pieces pieces : simPieces) {
+                    for (Piece piece : simPieces) {
                         //If the mouse is on ally piece, pick it up as the activeP
-                        if (pieces.color == currentColor && pieces.col == mouse.x / Chessboard.SQUARE_SIZE && pieces.row == mouse.y / Chessboard.SQUARE_SIZE) {
+                        if (piece.color == currentColor && piece.col == mouse.x / Chessboard.SQUARE_SIZE && piece.row == mouse.y / Chessboard.SQUARE_SIZE) {
                             //setting this piece as active piece
-                            activeP = pieces;
+                            activeP = piece;
                         }
                     }
                 } //if the activeP is not null -> the player is already holding a piece -> so he can move it
@@ -415,12 +475,12 @@ private void update() {
 
     }
 
-    private boolean isIlegalmove(Pieces king) {
+    private boolean isIlegalmove(Piece king) {
 
         if (king.type == Types.KING) {
-            for (Pieces pieces : simPieces) { //If it's king, scan the simPieces and check
+            for (Piece piece : simPieces) { //If it's king, scan the simPieces and check
                 //if there is a piece that is not the king itself and has a different color and can move to the square where king is trying to move now
-                if (pieces != king && pieces.color != king.color && pieces.canMove(king.col, king.row)) { //If these conditions are matched, this move is illegal
+                if (piece != king && piece.color != king.color && piece.canMove(king.col, king.row)) { //If these conditions are matched, this move is illegal
                     return true;
                 }
             }
@@ -431,10 +491,10 @@ private void update() {
 
     boolean opponentCanCaptureKing() {
 
-        Pieces king = getKing(false); //I want to get the current color's king
+        Piece king = getKing(false); //I want to get the current color's king
         if (king != null) {
-            for (Pieces pieces : simPieces) { //I scan the simPieces and cheek if there is a piece that can move to the king's square
-                if (pieces.color != king.color && pieces.canMove(king.col, king.row)) {
+            for (Piece piece : simPieces) { //I scan the simPieces and cheek if there is a piece that can move to the king's square
+                if (piece.color != king.color && piece.canMove(king.col, king.row)) {
                     return true;
                 }
             }
@@ -444,7 +504,7 @@ private void update() {
 
     boolean isKingInCheck() {
 
-        Pieces king = getKing(true);//I get the opponent's king
+        Piece king = getKing(true);//I get the opponent's king
         if (king != null) {
             if (activeP.canMove(king.col, king.row)) { //I check if the activeP can move to the square where the opponent's king is
                 checkingP = activeP; //and if can, this piece is checking the king, so I set it as checking piece
@@ -456,17 +516,17 @@ private void update() {
         return false;
     }
 
-    private Pieces getKing(boolean opponent) {
+    private Piece getKing(boolean opponent) {
 
-        Pieces king = null;
-        for (Pieces pieces : simPieces) { //This method finds the king  in the simPieces and return it
+        Piece king = null;
+        for (Piece piece : simPieces) { //This method finds the king  in the simPieces and return it
             if (opponent) { //If this boolean opponent true, return the opponent's king and if this boolean is false, return you own king
-                if (pieces.type == Types.KING && pieces.color != currentColor) {
-                    king = pieces;
+                if (piece.type == Types.KING && piece.color != currentColor) {
+                    king = piece;
                 }
             } else {
-                if (pieces.type == Types.KING && pieces.color == currentColor) {
-                    king = pieces;
+                if (piece.type == Types.KING && piece.color == currentColor) {
+                    king = piece;
                 }
             }
         }
@@ -474,7 +534,7 @@ private void update() {
     }
 
     private boolean Checkmate() {
-        Pieces king = getKing(true); // First we get the opponent's king
+        Piece king = getKing(true); // First we get the opponent's king
 
         // If the king can move, is not checkmate.
         if (kingCanMove(king)) {
@@ -483,7 +543,7 @@ private void update() {
         //If the checkingP is knight
         if (checkingP instanceof Knight) {
             //I scan the simPieces (defensive¨options)
-            for (Pieces piece : simPieces) {
+            for (Piece piece : simPieces) {
                 //The defensive piece must have the same color as the king
                 if (piece.color == king.color && piece.canMove(checkingP.col, checkingP.row)) {
                     return false; // The knight can be taken, so it is still not checkmate.
@@ -499,7 +559,7 @@ private void update() {
                 if (checkingP.row < king.row) {
                     //The checkingP is above the king
                     for (int row = checkingP.row; row < king.row; row++) {
-                        for (Pieces piece : simPieces) {
+                        for (Piece piece : simPieces) {
                             if (piece != king && piece.color == king.color && piece.canMove(checkingP.col, row)) {
                                 return false; // The attack can be blocked
                             }
@@ -508,7 +568,7 @@ private void update() {
                 } else {
                     //The checkingP is below the king
                     for (int row = checkingP.row; row > king.row; row--) {
-                        for (Pieces piece : simPieces) {
+                        for (Piece piece : simPieces) {
                             if (piece != king && piece.color == king.color && piece.canMove(checkingP.col, row)) {
                                 return false; //The attack can be blocked
                             }
@@ -520,7 +580,7 @@ private void update() {
                 if (checkingP.col < king.col) {
                     //The checkingP is to the left of the king
                     for (int col = checkingP.col; col < king.col; col++) {
-                        for (Pieces piece : simPieces) {
+                        for (Piece piece : simPieces) {
                             if (piece != king && piece.color == king.color && piece.canMove(col, checkingP.row)) {
                                 return false; //The attack can be blocked
                             }
@@ -529,7 +589,7 @@ private void update() {
                 } else {
                     //The checkingP is to the right of the king
                     for (int col = checkingP.col; col > king.col; col--) {
-                        for (Pieces piece : simPieces) {
+                        for (Piece piece : simPieces) {
                             if (piece != king && piece.color == king.color && piece.canMove(col, checkingP.row)) {
                                 return false; //The attack can be blocked
                             }
@@ -542,7 +602,7 @@ private void update() {
                     if (checkingP.col < king.col) {
                         //The checkingP is in the upper left direction towards the king
                         for (int col = checkingP.col, row = checkingP.row; col < king.col && row < king.row; col++, row++) {
-                            for (Pieces piece : simPieces) {
+                            for (Piece piece : simPieces) {
                                 if (piece != king && piece.color == king.color && piece.canMove(col, row)) {
                                     return false; //The attack can be blocked
                                 }
@@ -551,7 +611,7 @@ private void update() {
                     } else {
                         //The checking is in the upper right direction towards the king
                         for (int col = checkingP.col, row = checkingP.row; col > king.col && row < king.row; col--, row++) {
-                            for (Pieces piece : simPieces) {
+                            for (Piece piece : simPieces) {
                                 if (piece != king && piece.color == king.color && piece.canMove(col, row)) {
                                     return false; //The attack can be blocked
                                 }
@@ -562,7 +622,7 @@ private void update() {
                     if (checkingP.col < king.col) {
                         //The checkingP is in the lower left direction towards the king
                         for (int col = checkingP.col, row = checkingP.row; col < king.col && row > king.row; col++, row--) {
-                            for (Pieces piece : simPieces) {
+                            for (Piece piece : simPieces) {
                                 if (piece != king && piece.color == king.color && piece.canMove(col, row)) {
                                     return false; //The attack can be blocked
                                 }
@@ -571,7 +631,7 @@ private void update() {
                     } else {
                         //The checkingP is in the lower right direction towards the king
                         for (int col = checkingP.col, row = checkingP.row; col > king.col && row > king.row; col--, row--) {
-                            for (Pieces piece : simPieces) {
+                            for (Piece piece : simPieces) {
                                 if (piece != king && piece.color == king.color && piece.canMove(col, row)) {
                                     return false; //The attack can be blocked
                                 }
@@ -586,59 +646,7 @@ private void update() {
         return true;
     }
 
-    // Vrátí všechny možné tahy pro danou barvu
-    // Vrátí všechny možné tahy pro danou barvu
-    //public ArrayList<Chessboard.Move> getAllAvailableMoves(int color) {
-    //    ArrayList<Chessboard.Move> moves = new ArrayList<>();
-    //
-    //    for (Pieces p : pieces) {
-    //        if (p.color != color) continue; // přeskočíme soupeřovy figury
-    //
-    //        for (int r = 0; r < 8; r++) {
-    //            for (int c = 0; c < 8; c++) {
-    //                // Reset simulovaných figur
-    //                copyPieces(pieces, simPieces);
-    //
-    //                int originalCol = p.col;
-    //                int originalRow = p.row;
-    //
-    //                if (p.canMove(c, r)) {
-    //                    Pieces captured = null;
-    //                    for (Pieces target : simPieces) {
-    //                        if (target != p && target.col == c && target.row == r) {
-    //                            captured = target;
-    //                            simPieces.remove(target);
-    //                            break;
-    //                        }
-    //                    }
-    //
-    //                    // Pokud tah není ilegální a král není ohrožen
-    //                    if (!isIlegalmove(p) && !opponentCanCaptureKing()) {
-    //
-    //                    Pieces capturedPieces = board[row][col];
-    //
-    //                    moves.add(new MoveImpl(
-    //                    p,
-    //                    p.row, p.col,   // START
-    //                    r, c,           // CÍL
-    //                    captured,
-    //                    evaluateMove(p, c, r)
-    //    ));
-    //}
-    //
-    //                    // Obnovíme původní pozici
-    //                    p.col = originalCol;
-    //                    p.row = originalRow;
-    //                    copyPieces(pieces, simPieces);
-    //                    if (captured != null) simPieces.add(captured);
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    return moves;
-    //}
-    private boolean kingCanMove(Pieces king) { //I check if the king in check can move to a square where it is not under attack
+    private boolean kingCanMove(Piece king) { //I check if the king in check can move to a square where it is not under attack
         //here is some problem
         //Simulate if there is any square where the king can move to
         if (isValidMove(king, -1, -1)) {
@@ -660,16 +668,17 @@ private void update() {
         if (isValidMove(king, -1, 1)) {
             return true;
         } //It means to move to left diagonally(down)
+        //It means to move to left diagonally(down)
         if (isValidMove(king, 0, 1)) {
             return true;
-        }  //It means to move to down
-        if (isValidMove(king, 1, 1)) {
-            return true;
-        }  //It means to move to right diagonally(down) and check if these all directions are valid moves                                            
-        return false; //If none of them return ture, thatt means there is no square that the king can move
+        }
+        //It means to move to right diagonally(down) and check if these all directions are valid moves
+        //If none of them return ture, thatt means there is no square that the king can move
+        //It means to move to down
+        return isValidMove(king, 1, 1);
     }
 
-    private boolean isValidMove(Pieces king, int colPlus, int rowPlus) {
+    private boolean isValidMove(Piece king, int colPlus, int rowPlus) {
 
         boolean isValidMove = false;
         //Update the king's position for a second
@@ -696,7 +705,7 @@ private void update() {
 
         int count = 0;
         //Count the number of pieces of the opponent
-        for (Pieces pieces : simPieces) {
+        for (Piece pieces : simPieces) {
             if (pieces.color != currentColor) {
                 count++;
             }
@@ -727,7 +736,7 @@ private void update() {
         StringBuilder sb = new StringBuilder();
 
         // Přidej informace o každé figuře
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             sb.append(p.type)
                     .append(p.color)
                     .append(p.col)
@@ -748,7 +757,7 @@ private void update() {
         currentColor = (currentColor == WHITE) ? BLACK : WHITE;
 
         // Reset TwoStepped status
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p.color == currentColor) {
                 p.twoStepped = false;
 
@@ -778,7 +787,7 @@ private void update() {
         // Kontrola nedostatečného materiálu
         if (!stalemate && !gameover) {
             int kingCount = 0, bishopCount = 0, knightCount = 0, totalPieces = 0;
-            for (Pieces p : simPieces) {
+            for (Piece p : simPieces) {
                 totalPieces++;
                 switch (p.type) {
                     case KING:
@@ -824,7 +833,6 @@ private void update() {
                     catch (InterruptedException e) {
                     }
                     performAIMove();  // AI udělá svůj tah
-                    //makeComputerMove();
 
                     // Po tahu AI přepneme zpět na hráče
                     if (isDisplayable()) {
@@ -853,7 +861,7 @@ private void update() {
 
     private void promoting() {
         if (mouse.pressed) {
-            for (Pieces piece : promotedP) {
+            for (Piece piece : promotedP) {
                 //If there is a piece that has the same col and row as the mouse col and row that means the mouse is one of these pieces
                 if (piece.col == mouse.x / Chessboard.SQUARE_SIZE && piece.row == mouse.y / Chessboard.SQUARE_SIZE) {
                     switch (piece.type) {
@@ -880,6 +888,14 @@ private void update() {
                 }
             }
         }
+    }
+
+    private void initButtons() {
+        createButton();
+        createButton2();
+        createButton3();
+        createButton4();
+        createButton5();
     }
 
     private void createButton() {
@@ -977,7 +993,7 @@ private void update() {
                         Thread.sleep(500);
                     } catch (InterruptedException ex) {
                     }
-                    makeComputerMove();
+                    performAIMove();
                     repaint();
                 }).start();
             }
@@ -986,7 +1002,7 @@ private void update() {
         this.add(compButton);
     }
 
-private void createButton5() {
+    private void createButton5() {
         javax.swing.JButton setUpButton = new javax.swing.JButton("Set position");
         setUpButton.setBounds(850, 300, 200, 55);
         setUpButton.setFont(new Font("Book Antiqua", Font.BOLD, 18));
@@ -999,6 +1015,13 @@ private void createButton5() {
             ChessPositionSetter setter = new ChessPositionSetter(this);
             setter.setVisible(true);
         });
+    }
+
+    public void checkComputerColor() {
+        int computerCol = BLACK;
+        if (currentColor == computerCol) {
+            new MiniMax(board, 3).execute(board);
+        }
     }
 
     private void initKeyBindings(JComponent component) {
@@ -1014,58 +1037,12 @@ private void createButton5() {
         });
     }
 
-    public void makeComputerMove() {
-        if (isGameOver() || isStalemate() || isDraw()) {
-            return;
-        }
-
-        // Použijeme aktuální šachovnici a hloubku AI
-        MiniMax ai = new MiniMax(new BoardEvaluator() {
-            @Override
-            public int evaluate(Chessboard board, int depth) {
-                // jednoduché hodnocení - můžeš upravit podle vlastních pravidel
-                int score = 0;
-                for (Pieces p : board.getPieces()) {
-                    switch (p.type) {
-                        case PAWN:
-                            score += 10;
-                            break;
-                        case KNIGHT:
-                            score += 30;
-                            break;
-                        case BISHOP:
-                            score += 33;
-                            break;
-                        case ROOK:
-                            score += 50;
-                            break;
-                        case QUEEN:
-                            score += 90;
-                            break;
-                        case KING:
-                            score += 900;
-                            break;
-                    }
-                }
-                return score;
-            }
-        }, 3); // hloubka 3
-
-        // Spustíme MiniMax s aktuální šachovnicí a hloubkou
-        Move bestMove = (Move) ai.execute(board, 3);
-
-        if (bestMove != null) {
-            // Provedeme tah
-            performMove(bestMove.piece, bestMove.targetCol, bestMove.targetRow);
-        }
-    }
-
     // Jednoduchá ohodnocovací funkce
-    int evaluateMove(Pieces p, int targetCol, int targetRow) {
+    int evaluateMove(Piece p, int targetCol, int targetRow) {
         int score = 0;
 
         // Zjistíme, jestli na cílovém políčku je soupeřova figura
-        for (Pieces target : pieces) {
+        for (Piece target : pieces) {
             if (target.col == targetCol && target.row == targetRow && target.color != currentColor) {
                 // Hodnoty figur:
                 switch (target.type) {
@@ -1108,10 +1085,10 @@ private void createButton5() {
     }
 
     // Metoda pro fyzické provedení tahu (bez myši)
-    private void performMove(Pieces piece, int col, int row) {
+    private void performMove(Piece piece, int col, int row) {
         // 1. Najdeme figuru v reálném listu 'pieces'
-        Pieces realPiece = null;
-        for (Pieces p : pieces) {
+        Piece realPiece = null;
+        for (Piece p : pieces) {
             // Porovnáváme ideálně přes referenci, nebo přes ID, pokud máš.
             // Zde spoléháme na to, že objekt z 'makeComputerMove' (p) je z listu 'pieces'.
             // Pokud p pochází z kopie, musíme najít originál podle souřadnic/typu.
@@ -1120,7 +1097,6 @@ private void createButton5() {
                 break;
             }
         }
-
 
 // Pokud se nepodařilo najít (pojistka)
         if (realPiece == null) {
@@ -1141,7 +1117,7 @@ private void createButton5() {
 
         // 3. Zkontrolujeme braní figury
         activeP.hittingP = null;
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p != activeP && p.col == activeP.col && p.row == activeP.row) {
                 activeP.hittingP = p;
                 break;
@@ -1167,7 +1143,7 @@ private void createButton5() {
                 pieces.remove(activeP);
 
                 // Vytvoříme dámu (počítač si bere vždy dámu)
-                Pieces queen = new Queen(activeP.color, activeP.col, activeP.row, true);
+                Piece queen = new Queen(activeP.color, activeP.col, activeP.row, true);
                 pieces.add(queen);
 
                 // Přepneme activeP na novou dámu, aby updatePosition níže fungoval
@@ -1188,7 +1164,7 @@ private void createButton5() {
     }
     // Pomocná metoda pro rošádu počítače (pokud ji chcete podporovat)
 
-    private boolean checkCastlingForComputer(Pieces p) {
+    private boolean checkCastlingForComputer(Piece p) {
         // Vaše metoda checkCastling spoléhá na logiku pohybu myší,
         // pro bota by se musela upravit. Pro základní verzi stačí vrátit false.
         return false;
@@ -1201,7 +1177,7 @@ private void createButton5() {
         //BOARD
         board.draw(g2);
         //PIECES
-        for (Pieces p : simPieces) {
+        for (Piece p : simPieces) {
             p.draw(g2);
         }
         if (activeP != null) {
@@ -1228,7 +1204,7 @@ private void createButton5() {
 
         if (promotion) {
             g2.drawString("Promote to:", 840, 150);
-            for (Pieces pieces : promotedP) { //I scan the promoted pieces list and draw the image one by one
+            for (Piece pieces : promotedP) { //I scan the promoted pieces list and draw the image one by one
                 g2.drawImage(pieces.image, pieces.getX(pieces.col), pieces.getY(pieces.row), Chessboard.SQUARE_SIZE, Chessboard.SQUARE_SIZE, null);
             } //I get X and Y coordinate and the image size
         } else {
@@ -1275,7 +1251,7 @@ private void createButton5() {
         StringBuilder sb = new StringBuilder();
 
         //Position all pieces
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             sb.append(p.type)
                     .append("_").append(p.color)
                     .append("_").append(p.col)
@@ -1291,7 +1267,7 @@ private void createButton5() {
         boolean whiteRookLeftMoved = false, whiteRookRightMoved = false;
         boolean blackRookLeftMoved = false, blackRookRightMoved = false;
 
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p.type == Types.KING) {
                 if (p.color == WHITE && p.hasmoved) {
                     whiteKingMoved = true;
@@ -1329,7 +1305,7 @@ private void createButton5() {
                 .append(";");
 
         // --- En passant (dvoukrokový pěšec) ---
-        for (Pieces p : pieces) {
+        for (Piece p : pieces) {
             if (p.type == Types.PAWN && p.twoStepped) {
                 sb.append("enpassant:")
                         .append(p.col).append("_").append(p.row)
@@ -1373,7 +1349,4 @@ private void createButton5() {
                 javax.swing.JOptionPane.INFORMATION_MESSAGE
         );
     }
-
 }
-
-

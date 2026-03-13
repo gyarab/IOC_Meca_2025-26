@@ -41,6 +41,17 @@ public enum Alliance {
                 final BlackPlayer blackPlayer) {
             return whitePlayer;
         }
+
+        @Override
+        public String toString() {
+            return "White";
+        }
+
+         
+        public int rookBonus(final int position) {
+            return BoardUtils.WHITE_ROOK_PREFERRED_COORDINATES[position];
+        }
+
     },
     BLACK {
         @Override
@@ -74,11 +85,22 @@ public enum Alliance {
             return blackPlayer;
 
         }
+
+          @Override
+        public String toString() {
+            return "Black";
+        }
+        
+        public int rookBonus(final int position) {
+            return BoardUtils.BLACK_ROOK_PREFERRED_COORDINATES[position];
+        }
     };
 
     public abstract int getDirection();
 
     public abstract int getOppositeDirection();
+
+     public abstract int rookBonus(int position);
 
     public abstract boolean isWhite();
 

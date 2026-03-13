@@ -4,7 +4,7 @@
  */
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 
 /**
  *
@@ -16,7 +16,7 @@ public class MoveResult {
     boolean check;
     boolean checkmate;
     boolean stalemate;
-    Pieces capturedPiece;
+    Piece capturedPiece;
 
     public MoveResult(MoveStatus status) {
         this.status = status;

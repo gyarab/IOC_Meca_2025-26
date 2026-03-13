@@ -9,9 +9,9 @@ package Chess;
  */
 public interface MoveStrategy {
     
-    Move execute(Chessboard board, int depth);
-    
     long getNumBoardsEvaluated();
+    
+    Move execute(Chessboard board);    
     
     /**
      *

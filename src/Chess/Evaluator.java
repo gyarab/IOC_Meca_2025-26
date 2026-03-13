@@ -4,7 +4,7 @@
  */
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 import Chess.Pieces.piece.Types;
 
 /**
@@ -13,12 +13,12 @@ import Chess.Pieces.piece.Types;
  */
 public class Evaluator {
 
-    public static int evaluateBoard(Pieces[][] board) {
+    public static int evaluateBoard(Piece[][] board) {
         int score = 0;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Pieces piece = board[row][col];
+                Piece piece = board[row][col];
                 if (piece != null) {
                     int materialValue = piece.getType().getValue();
                     int positionalValue = getPositionalValue(piece, row, col);
@@ -31,11 +31,11 @@ public class Evaluator {
                     }
 
                     // Bílé +, černé -
-                    score += piece.getAlliance() == Alliance.WHITE ? pieceScore : -pieceScore;
+                    score += piece.getPieceAllegiance() == Alliance.WHITE ? pieceScore : -pieceScore;
 
                     // Mobilita
                     int mobility = piece.getLegalMoves(board).size(); // počet tahů
-                    score += piece.getAlliance() == Alliance.WHITE ? mobility : -mobility;
+                    score += piece.getPieceAllegiance() == Alliance.WHITE ? mobility : -mobility;
 
                 }
             }
@@ -49,36 +49,36 @@ public class Evaluator {
         return score; // kladné = výhoda bílé, záporné = výhoda černé
     }
 
-    private static int getPositionalValue(Pieces piece, int row, int col) {
+    private static int getPositionalValue(Piece piece, int row, int col) {
 
         switch (piece.getType()) {
             case PAWN:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.PAWN_TABLE[row][col]
                         : PSQT.PAWN_TABLE[7 - row][col];
 
             case KNIGHT:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.KNIGHT_TABLE[row][col]
                         : PSQT.KNIGHT_TABLE[7 - row][col];
 
             case BISHOP:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.BISHOP_TABLE[row][col]
                         : PSQT.BISHOP_TABLE[7 - row][col];
 
             case ROOK:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.ROOK_TABLE[row][col]
                         : PSQT.ROOK_TABLE[7 - row][col];
 
             case QUEEN:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.QUEEN_TABLE[row][col]
                         : PSQT.QUEEN_TABLE[7 - row][col];
 
             case KING:
-                return piece.getAlliance() == Alliance.WHITE
+                return piece.getPieceAllegiance() == Alliance.WHITE
                         ? PSQT.KING_TABLE[row][col]
                         : PSQT.KING_TABLE[7 - row][col];
 
@@ -87,18 +87,18 @@ public class Evaluator {
         }
     }
 
-    private static boolean isPieceAttacked(Pieces piece, Pieces[][] board) {
+    private static boolean isPieceAttacked(Piece piece, Piece[][] board) {
     // aliance nepřítele
-    Alliance enemy = piece.getAlliance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
+    Alliance enemy = piece.getPieceAllegiance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
 
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-            Pieces attacker = board[row][col];
-            if (attacker != null && attacker.getAlliance() == enemy) {
+            Piece attacker = board[row][col];
+            if (attacker != null && attacker.getPieceAllegiance() == enemy) {
                 for (Move move : attacker.getLegalMoves(board)) {
                     // pokud tah protivníka cílí na tuto figurku
-                    if (move.getDestinationRow() == piece.getRow() &&
-                        move.getDestinationCol() == piece.getCol()) {
+                    if (move.getDestinationRow() == piece.getRow(y) &&
+                        move.getDestinationCol() == piece.getCol(x)) {
                         return true;
                     }
                 }
@@ -109,14 +109,14 @@ public class Evaluator {
     return false; // nikdo tuto figurku neohrožuje
 }
 
-    private static int evaluateKingSafety(Pieces[][] board, Alliance alliance) {
+    private static int evaluateKingSafety(Piece[][] board, Alliance alliance) {
         // Najdi krále
-        Pieces king = null;
+        Piece king = null;
         int kingRow = -1, kingCol = -1;
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Pieces piece = board[row][col];
-                if (piece != null && piece.getType() == Types.KING && piece.getAlliance() == alliance) {
+                Piece piece = board[row][col];
+                if (piece != null && piece.getType() == Types.KING && piece.getPieceAllegiance() == alliance) {
                     king = piece;
                     kingRow = row;
                     kingCol = col;
@@ -137,8 +137,8 @@ public class Evaluator {
                 int r = kingRow + dr;
                 int c = kingCol + dc;
                 if (r >= 0 && r < 8 && c >= 0 && c < 8) {
-                    Pieces p = board[r][c];
-                    if (p != null && p.getAlliance() == alliance) {
+                    Piece p = board[r][c];
+                    if (p != null && p.getPieceAllegiance() == alliance) {
                         friendlyAround++;
                     }
                 }

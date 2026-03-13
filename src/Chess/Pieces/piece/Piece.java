@@ -7,6 +7,7 @@ package Chess.Pieces.piece;
 
 import Chess.Alliance;
 import Chess.Chessboard;
+import Chess.Chessboard.Builder;
 import Chess.Chesswindowpanel;
 import Chess.Move;
 import java.awt.Graphics2D;
@@ -19,7 +20,7 @@ import javax.imageio.ImageIO;
  *
  * @author Admin
  */
-public abstract class Pieces {
+public abstract class Piece {
 
     public Alliance pieceAlliance;
     public Types type;
@@ -27,14 +28,14 @@ public abstract class Pieces {
     public int x, y;
     public int col, row, pceCol, pceRow;
     public int color;
-    public Pieces hittingP;
-    public Pieces activeP;
+    public Piece hittingP;
+    public Piece activeP;
     public boolean hasmoved, twoStepped;
     private final boolean isFirstMove;
     private final int cachedHashCode;
-    private final int piecePosition;
+    final int piecePosition;
 
-    public Pieces(int color, int col, int row, final boolean isFirstMove) {
+    public Piece(int color, int col, int row, final boolean isFirstMove) {
         this.color = color;
         this.col = col;
         this.row = row;
@@ -126,14 +127,14 @@ public abstract class Pieces {
 
     public Collection<Move> getLegalMoves(Piece[][] boardPieces) {
         Chessboard board = new Chessboard(new Builder());
-        System.out.println("Legální tahy jsou:" + board.getAllLegalMoves());
+        System.out.println("Legální tahy jsou:" + board.getAllLegalMoves());    
         return board.getAllLegalMoves();
 
     }
 
     public abstract int locationBonus();
 
-    public abstract Pieces getMovedPiece(Move move);
+    public abstract Piece getMovedPiece(Move move);
 
     public abstract Collection<Move> calculateLegalMoves(final Chessboard board);
 
@@ -142,10 +143,10 @@ public abstract class Pieces {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Pieces)) {
+        if (!(other instanceof Piece)) {
             return false;
         }
-        final Pieces otherPiece = (Pieces) other;
+        final Piece otherPiece = (Piece) other;
         return this.piecePosition == otherPiece.piecePosition && this.type == otherPiece.type &&
                this.pieceAlliance == otherPiece.pieceAlliance && this.isFirstMove == otherPiece.isFirstMove;
     }
@@ -208,8 +209,8 @@ public abstract class Pieces {
         return false;
     }
 
-    public Pieces getHittingP(int targetCol, int targetRow) {
-        for (Pieces pieces : Chesswindowpanel.simPieces) {
+    public Piece getHittingP(int targetCol, int targetRow) {
+        for (Piece pieces : Chesswindowpanel.simPieces) {
             if (pieces.col == targetCol && pieces.row == targetRow && pieces != this) {
                 return pieces; //It is used to search for a chess piece that is currently at the specified target position
             }
@@ -236,7 +237,7 @@ public abstract class Pieces {
     public boolean pieceIsOnStraightLine(int targetCol, int targetRow) {
         //When this piece is moving to the left
         for (int c = pceCol - 1; c > targetCol; c--) { //passes all the fields to the left of pceCol until the values are greater than targetCol
-            for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
+            for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
                 if (pieces.col == c && pieces.row == targetRow) { //and check if there is a piece on the square
                     hittingP = pieces;
                     return true;
@@ -245,7 +246,7 @@ public abstract class Pieces {
         }
         //When this piece is moving to the right
         for (int c = pceCol + 1; c < targetCol; c++) { //passes all the fields to the rigth of pceCol until the values are smaller than targetCol
-            for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
+            for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
                 if (pieces.col == c && pieces.row == targetRow) { //and check if there is a piece on the square
                     hittingP = pieces;
                     return true;
@@ -254,7 +255,7 @@ public abstract class Pieces {
         }
         //When this piece is moving up
         for (int r = pceRow - 1; r > targetRow; r--) { //passes all the fields to the up from the pceRow until the values are greater than targetRow
-            for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
+            for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
                 if (pieces.col == targetCol && pieces.row == r) { //and check if there is a piece on the square
                     hittingP = pieces;
                     return true;
@@ -263,7 +264,7 @@ public abstract class Pieces {
         }
         //When this piece is moving down
         for (int r = pceRow + 1; r < targetRow; r++) { //loops all the fields to the down from the pceRow until the values are smaller than targetRow
-            for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
+            for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the simPieces  
                 if (pieces.col == targetCol && pieces.row == r) { //and check if there is a piece on the square
                     hittingP = pieces;
                     return true;
@@ -279,7 +280,7 @@ public abstract class Pieces {
             //Up left
             for (int c = pceCol - 1; c > targetCol; c--) { //passes all the field to the left of the pceCol until the values are greater than targetCol
                 int dif = Math.abs(c - pceCol); //I get the difference of the currently checking col and the pceCol  
-                for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
+                for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
                     if (pieces.col == c && pieces.row == pceRow - dif) { //dif is used to determine the line position -> might be occupied by piece
                         hittingP = pieces;
                         return true;
@@ -289,7 +290,7 @@ public abstract class Pieces {
             //Up right
             for (int c = pceCol + 1; c < targetCol; c++) { //passes all the field to the right of the pceCol until the values are smaller than targetCol
                 int dif = Math.abs(c - pceCol); //I get the difference of the currently checking col and the pceCol  
-                for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
+                for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
                     if (pieces.col == c && pieces.row == pceRow - dif) { //dif is used to determine the line position -> might be occupied by piece
                         hittingP = pieces;
                         return true;
@@ -301,7 +302,7 @@ public abstract class Pieces {
             //Down left
             for (int c = pceCol - 1; c > targetCol; c--) {
                 int dif = Math.abs(c - pceCol); //I get the difference of the currently checking col and the pceCol  
-                for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
+                for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
                     if (pieces.col == c && pieces.row == pceRow + dif) { //dif is used to determine the line position -> might be occupied by piece
                         hittingP = pieces;
                         return true;
@@ -311,7 +312,7 @@ public abstract class Pieces {
             //Down right
             for (int c = pceCol + 1; c < targetCol; c++) {
                 int dif = Math.abs(c - pceCol); //I get the difference of the currently checking col and the pceCol  
-                for (Pieces pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
+                for (Piece pieces : Chesswindowpanel.simPieces) { //I scan the list and check if there is a piece that has the same col and row
                     if (pieces.col == c && pieces.row == pceRow + dif) { //dif is used to determine the line position -> might be occupied by piece
                         hittingP = pieces;
                         return true;
@@ -323,7 +324,7 @@ public abstract class Pieces {
     }
 
     public boolean IsPieceNearTheKing(int targetCol, int targetRow) {
-        for (Pieces pieces : Chesswindowpanel.simPieces) {
+        for (Piece pieces : Chesswindowpanel.simPieces) {
             if (pieces.col == 1 && pieces.row == 0) {
                 if (pieces.col == 6 && pieces.row == 0) {
                     System.out.println("Skvele");

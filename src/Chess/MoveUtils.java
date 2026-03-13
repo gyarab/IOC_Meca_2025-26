@@ -8,10 +8,15 @@ package Chess;
  *
  * @author mecova
  */
+import static Chess.BoardUtils.mvvlva;
+import Chess.Move.MoveFactory;
+import Chess.Move.NullMove;
+import Chess.Move.PawnPromotion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+
 
 public enum MoveUtils {
 
@@ -54,7 +59,7 @@ public enum MoveUtils {
         return promotions;
     }
 
-    public static Move getMove(final Board board,
+    public static Move getMove(final Chessboard board,
                                final String from,
                                final String to) {
         return MoveFactory.createMove(board, BoardUtils.INSTANCE.getCoordinateAtPosition(from),

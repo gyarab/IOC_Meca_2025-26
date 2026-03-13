@@ -11,19 +11,16 @@ public final class MoveTransition {
     
     private final Chessboard fromBoard;
     private final Chessboard toBoard;
-    private final Chessboard transitionBoard;
     private final Move transitionMove;
     private final MoveStatus moveStatus;
 
     public MoveTransition(final Chessboard fromBoard,
                           final Chessboard toBoard,
-                          final Chessboard transitionBoard,
                           final Move transitionMove,
                           final MoveStatus moveStatus) {
         
         this.fromBoard = fromBoard;
         this.toBoard = toBoard;
-        this.transitionBoard = transitionBoard;
         this.transitionMove = transitionMove;
         this.moveStatus = moveStatus;
     }
@@ -42,11 +39,5 @@ public final class MoveTransition {
 
     public MoveStatus getMoveStatus() {
         return this.moveStatus;
-    }
-
-    public Chessboard getTransitionBoard() {
-        return this.transitionBoard;
-    }
-
-        
+    }   
 }
