@@ -10,6 +10,8 @@ package Chess;
  */
 import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Piece;
+import Chess.Pieces.piece.Types;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +43,7 @@ public final class WhitePlayer extends Player {
                 if (kingSideRook != null && kingSideRook.isFirstMove()) {
                     if (BoardUtils.calculateAttacksOnTile(61, opponentLegals).isEmpty()
                             && BoardUtils.calculateAttacksOnTile(62, opponentLegals).isEmpty()
-                            && kingSideRook.getPieceType() == ROOK) {
+                            && kingSideRook.getPieceType() == Types.ROOK) {
                         if (!BoardUtils.isKingPawnTrap(this.board, this.playerKing, 52)) {
                             kingCastles.add(new KingSideCastleMove(this.board, this.playerKing, 62, (Rook) kingSideRook, 61));
                         }
