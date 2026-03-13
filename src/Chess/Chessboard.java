@@ -85,12 +85,6 @@ public final class Chessboard {
                 : Chesswindowpanel.WHITE;
     }
 
-    boolean isOpenFile(int col) {
-
-        return true;
-
-    }
-
     /*
      * =========================
      * GETTERS
@@ -193,7 +187,7 @@ public final class Chessboard {
         }
     }
 
-    private static Chessboard createStandardBoardImpl() {
+    private static Builder createStandardBoardImpl() {
         final Builder builder = new Builder();
         // Black layout
         // White layout
@@ -269,7 +263,7 @@ public final class Chessboard {
 
     public static class Builder {
 
-        Piece[] boardPieces;
+        Piece[] boardPieces = new Piece[64];
         Alliance nextMoveMaker;
         Pawn enPassantPawn;
 
@@ -288,7 +282,9 @@ public final class Chessboard {
         }
 
         public Builder setMoveMaker(final Alliance nextMoveMaker) {
-            this.nextMoveMaker = nextMoveMaker;
+            
+                this.nextMoveMaker = nextMoveMaker;
+            
             return this;
         }
 
@@ -341,3 +337,4 @@ public final class Chessboard {
         }
     }
 }
+

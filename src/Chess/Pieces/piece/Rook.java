@@ -139,4 +139,5 @@ public class Rook extends Piece {
                 || (BoardUtils.EIGHTH_COLUMN.get(position) && (offset == 1));
     }
 
+
 }

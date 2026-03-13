@@ -131,6 +131,7 @@ public abstract class Piece {
         return board.getAllLegalMoves();
 
     }
+    
 
     public abstract int locationBonus();
 
@@ -344,5 +345,6 @@ public abstract class Piece {
     }
 
 }
+
 
 
