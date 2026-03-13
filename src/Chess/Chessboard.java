@@ -102,7 +102,7 @@ public final class Chessboard {
         return Collections.unmodifiableList(allPieces);
     }
 
-    public Piece[] getPiece(int sq) {
+    public Piece getPiece(int sq) {
         return board[sq];
     }
 
@@ -187,12 +187,28 @@ public final class Chessboard {
         }
     }
 
-    private static Builder createStandardBoardImpl() {
-        final Builder builder = new Builder();
-        // Black layout
-        // White layout
-        // return builder.build();
-        return null;
+       private static Chessboard createStandardBoardImpl() {
+        Builder builder = new Chessboard.Builder();
+
+        builder.setMoveMaker(Alliance.WHITE);
+
+        for (Piece p : Chesswindowpanel.pieces) {
+            builder.setPiece(p); // boardPieces[piecePosition] = p
+        }
+
+        Chessboard board = builder.build();
+
+        board.pieces = new ArrayList<>(Chesswindowpanel.pieces);
+
+        board.rebuildBoard();
+
+        board.initializeEvaluation();
+
+        System.out.println("Pieces on board: " + board.pieces.size());
+        System.out.println("White pieces: " + board.whitePieceCoordinates.length);
+        System.out.println("Black pieces: " + board.blackPieceCoordinates.length);
+
+        return board;
     }
 
     public Collection<Move> getAllLegalMoves() {

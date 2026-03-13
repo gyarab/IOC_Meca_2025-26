@@ -20,12 +20,12 @@ public class Evaluator {
             for (int col = 0; col < 8; col++) {
                 Piece piece = board[row][col];
                 if (piece != null) {
-                    int materialValue = piece.getType().getValue();
+                    int materialValue = piece.getType().getPieceValue();
                     int positionalValue = getPositionalValue(piece, row, col);
 
                     int pieceScore = materialValue + positionalValue;
 
-                    //Penalizace ohrožení figurky
+                    // Penalizace ohrožení figurky
                     if (isPieceAttacked(piece, board)) {
                         pieceScore -= 10; // každá ohrožená figurka = -10
                     }
@@ -88,26 +88,28 @@ public class Evaluator {
     }
 
     private static boolean isPieceAttacked(Piece piece, Piece[][] board) {
-    // aliance nepřítele
-    Alliance enemy = piece.getPieceAllegiance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
+        // aliance nepřítele
+        Alliance enemy = piece.getPieceAllegiance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
 
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
-            Piece attacker = board[row][col];
-            if (attacker != null && attacker.getPieceAllegiance() == enemy) {
-                for (Move move : attacker.getLegalMoves(board)) {
-                    // pokud tah protivníka cílí na tuto figurku
-                    if (move.getDestinationRow() == piece.getRow(y) &&
-                        move.getDestinationCol() == piece.getCol(x)) {
-                        return true;
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece attacker = board[row][col];
+                if (attacker != null && attacker.getPieceAllegiance() == enemy) {
+                    for (Move move : attacker.getLegalMoves(board)) {
+                        // pokud tah protivníka cílí na tuto figurku
+                        int x = piece.getCol(col);
+                        int y = piece.getRow(row);
+                        if (move.getDestinationRow() == piece.getRow(y) &&
+                                move.getDestinationCol() == piece.getCol(x)) {
+                            return true;
+                        }
                     }
                 }
             }
         }
-    }
 
-    return false; // nikdo tuto figurku neohrožuje
-}
+        return false; // nikdo tuto figurku neohrožuje
+    }
 
     private static int evaluateKingSafety(Piece[][] board, Alliance alliance) {
         // Najdi krále

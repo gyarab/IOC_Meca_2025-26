@@ -10,8 +10,6 @@ import Chess.BoardUtils;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
-import Chess.Move.MajorAttackMove;
-import Chess.Move.MajorMove;
 import Chess.MoveUtils;
 import java.util.ArrayList;
 import java.util.Collection;
