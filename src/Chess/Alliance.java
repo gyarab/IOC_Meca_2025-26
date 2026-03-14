@@ -91,6 +91,7 @@ public enum Alliance {
             return "Black";
         }
         
+        @Override
         public int rookBonus(final int position) {
             return BoardUtils.BLACK_ROOK_PREFERRED_COORDINATES[position];
         }
