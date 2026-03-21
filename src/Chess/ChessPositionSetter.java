@@ -343,10 +343,10 @@ public class ChessPositionSetter extends JDialog {
             return;
         }
         
-        parent.boardPieces.clear();
-        parent.simBoardPieces.clear();
-        parent.boardPieces.addAll(resultPieces);
-        parent.copyPieces(parent.boardPieces, parent.simBoardPieces);
+        Chesswindowpanel.boardPieces.clear();
+        Chesswindowpanel.simBoardPieces.clear();
+        Chesswindowpanel.boardPieces.addAll(resultPieces);
+        parent.copyPieces(Chesswindowpanel.boardPieces, Chesswindowpanel.simBoardPieces);
 
         parent.currentColor = turnColor;
         parent.setWhiteCastleK(whiteCastleK);
@@ -355,7 +355,7 @@ public class ChessPositionSetter extends JDialog {
         parent.setBlackCastleQ(blackCastleQ);
 
         // ===== Check validity: king in check but not to move =====
-        int sideNotToMove = (turnColor == Chesswindowpanel.WHITE)
+        final int sideNotToMove = (turnColor == Chesswindowpanel.WHITE)
         ? Chesswindowpanel.BLACK
         : Chesswindowpanel.WHITE;
 
