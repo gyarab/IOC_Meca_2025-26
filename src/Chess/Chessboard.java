@@ -103,7 +103,7 @@ public final class Chessboard {
     }
 
     public Piece getPiece(int sq) {
-        return board[sq];
+        return board[sq][sq];
     }
 
     public Piece getPiece(int col, int row) {
