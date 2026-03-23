@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package Chess.Pieces.piece;
+import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
@@ -18,18 +19,40 @@ import java.util.List;
  */
 public class Knight extends Piece {
     
-    public Knight(int color, int col, int row,final boolean isFirstMove) {
-        super(color, col, row, true);
-        
-        type = Types.KNIGHT;
-    
-    if(color == Chesswindowpanel.WHITE) {
-         image = getImage("/Chess/Pieces/piece/w-knight");
-    } else {
-        image = getImage("/Chess/Pieces/piece/b-knight");
+     // GUI konstruktor
+    public Knight(int color, int col, int row, boolean isGui) {
+        super(color, col, row, isGui);
+        this.type = Types.KNIGHT;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
+
+        if (color == Chesswindowpanel.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-knight");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-knight");
+        }
     }
     
-}
+     // ENGINE delegátor, pokud chceš convenience overload
+    public Knight(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition, false);
+    }
+
+    // ENGINE konstruktor
+    public Knight(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition, isFirstMove);
+
+        type = Types.KNIGHT;
+
+        if (alliance == Alliance.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-knight");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-knight");
+        }
+    }
+
+
   @Override
   public boolean canMove(int targetCol,int targetRow){
       
@@ -47,13 +70,13 @@ public class Knight extends Piece {
 
     @Override
     public int locationBonus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+       return this.pieceAlliance.knightBonus(this.piecePosition);   
+    }    
 
     @Override
     public Piece getMovedPiece(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        return new Knight(this.pieceAlliance,move.getDestinationCoordinate(),false);   
+    }   
 
     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
