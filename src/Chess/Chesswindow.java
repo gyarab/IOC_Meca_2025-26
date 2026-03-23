@@ -16,19 +16,24 @@ import javax.swing.JMenuItem;
 public class Chesswindow{
 
     public static void main(String[] args) {
-    JFrame window = new JFrame("Chess");
-    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    window.setResizable(false);
+    JFrame frame = new JFrame("Chess");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setResizable(false);
    // Add GamePanel to the window
     Chesswindowpanel cp = new Chesswindowpanel();
-    window.add(cp);
-    window.pack();
-    window.setLocationRelativeTo(null);
-    window.setVisible(true);
+
+    Chessboard board = Chessboard.createStandardBoard();
+    MiniMax ai = new MiniMax(board,1);
+    System.out.println(ai.toString());
+    
+    frame.add(cp);
+    frame.pack();
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
     cp.launchGame();    
     }
 
-     private final JFrame frame;
+    private final JFrame frame;
     private final Chesswindowpanel panel = new Chesswindowpanel();
 
     public Chesswindow() {
