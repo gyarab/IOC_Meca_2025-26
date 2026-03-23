@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package Chess.Pieces.piece; 
+import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
@@ -19,18 +20,41 @@ import java.util.List;
 public class Pawn extends Piece{
     
     public boolean hasMoved = false;
+   
     
-    public Pawn(int color, int col, int row, final boolean isFirstMove) {
-        super(color, col, row, true);
-            
-        type = Types.PAWN;
-        
+       // GUI konstruktor
+    public Pawn(int color, int col, int row, boolean isGui) {
+        super(color, col, row, isGui);
+        this.type = Types.PAWN;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
+
         if(color == Chesswindowpanel.WHITE){
-         image = getImage("/Chess/Pieces/piece/w-pawn");
-    } else {
+            image = getImage("/Chess/Pieces/piece/w-pawn");
+        } else {
             image = getImage("/Chess/Pieces/piece/b-pawn");
         }
-}
+    }
+    
+     // ENGINE delegátor, pokud chceš convenience overload
+    public Pawn(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition, false);
+    }
+
+    // ENGINE konstruktor
+    public Pawn(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition,isFirstMove);
+
+        type = Types.PAWN;
+
+        if(alliance == Alliance.WHITE){
+            image = getImage("/Chess/Pieces/piece/w-pawn");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-pawn");
+        }
+    }
+   
     @Override
     public boolean canMove(int targetCol,int targetRow){
     
@@ -84,12 +108,12 @@ public class Pawn extends Piece{
 
     @Override
     public int locationBonus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         return this.pieceAlliance.pawnBonus(this.piecePosition);
     }
 
     @Override
     public Piece getMovedPiece(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return new Pawn(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
 
     @Override
