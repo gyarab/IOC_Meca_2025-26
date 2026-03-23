@@ -47,8 +47,71 @@ public final class Chessboard {
         this.currentPlayer = builder.nextMoveMaker.choosePlayerByAlliance(this.whiteplayer, this.blackPlayer);
     }
 
+        @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final Chessboard other = (Chessboard) obj;
+        return Arrays.equals(this.boardPieces, other.boardPieces) &&
+                this.currentPlayer.getAlliance() == other.currentPlayer.getAlliance() &&
+                Objects.equals(this.enPassantPawn, other.enPassantPawn) &&
+                this.whiteplayer.isKingSideCastleCapable() == other.whiteplayer.isKingSideCastleCapable() &&
+                this.whiteplayer.isQueenSideCastleCapable() == other.whiteplayer.isQueenSideCastleCapable() &&
+                this.blackPlayer.isKingSideCastleCapable() == other.blackPlayer.isKingSideCastleCapable() &&
+                this.blackPlayer.isQueenSideCastleCapable() == other.blackPlayer.isQueenSideCastleCapable();
+    }
+
+       @Override
+    public int hashCode() {
+        return Objects.hash(
+                Arrays.hashCode(this.boardPieces),
+                this.currentPlayer.getAlliance(),
+                this.enPassantPawn,
+                this.whiteplayer.isKingSideCastleCapable(),
+                this.whiteplayer.isQueenSideCastleCapable(),
+                this.blackPlayer.isKingSideCastleCapable(),
+                this.blackPlayer.isQueenSideCastleCapable()
+        );
+    }
+    
+     @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder("\n");
+        for (int i = 0; i < BoardUtils.NUM_TILES; i++) {
+            final String tileText = prettyPrint(this.boardPieces[i]);
+            builder.append(String.format("%3s", tileText));
+            if ((i + 1) % 8 == 0) {
+                builder.append("\n");
+            }
+        }
+        return builder.toString();
+    }
+    
+    
+    private static String prettyPrint(final Piece piece) {
+        if(piece != null) {
+            return piece.getPieceAllegiance().isBlack() ?
+                    piece.toString().toLowerCase() : piece.toString();
+        }
+        return "-";
+    }
+
+
     public int getSideToMove() {
         return sideToMove;
+    }
+
+    
+    public int[] getWhitePieceCoordinates() {
+        return this.whitePieceCoordinates;
+    }
+
+    public int[] getBlackPieceCoordinates() {
+        return this.blackPieceCoordinates;
     }
 
     public WhitePlayer whitePlayer() {
@@ -67,6 +130,10 @@ public final class Chessboard {
         return this.boardPieces;
     }
 
+    public Piece getPiece(int coordinate) {
+        return boardPieces[coordinate];
+    }
+
     public Piece[] getBoardCopy() {
         return this.boardPieces.clone();
     }
@@ -75,8 +142,16 @@ public final class Chessboard {
         return STANDARD_BOARD;
     }
 
+    public Chessboard getStandardBoard() {
+        return STANDARD_BOARD;
+    }
+
     public Pawn getEnPassantPawn() {
         return this.enPassantPawn;
+    }
+
+    public Stack<Move> getMoveHistory() {
+        return this.moveHistory;
     }
 
     public void switchSide() {
@@ -102,9 +177,6 @@ public final class Chessboard {
         return Collections.unmodifiableList(allPieces);
     }
 
-    public Piece getPiece(int sq) {
-        return board[sq][sq];
-    }
 
     public Piece getPiece(int col, int row) {
 
@@ -146,6 +218,15 @@ public final class Chessboard {
         return evaluation;
     }
 
+     public boolean isEmpty(int col, int row) {
+        return getPiece(col, row) == null;
+    }
+
+    public boolean isEnemy(int col, int row, boolean isWhite) {
+        Piece p = getPiece(col, row);
+        return p != null && p.isWhite() != isWhite;
+    }
+
     /*
      * =========================
      * CHECK
@@ -181,9 +262,7 @@ public final class Chessboard {
                 sq ^= 56;
             }
 
-            evaluation += p.isWhite()
-                    ? psqt.getPieceTableValue(p.getType(), sq, sq)
-                    : -psqt.getPieceTableValue(p.getType(), sq, sq);
+            evaluation += psqt.getPieceTableValue(p.getType(), p.col, p.row, p.isWhite());
         }
     }
 
