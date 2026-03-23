@@ -45,11 +45,8 @@ public class ChessPositionSetter extends JDialog {
     private final Map<Integer, Integer> knightCount = new HashMap<>();
     private final Map<Integer, Integer> bishopCount = new HashMap<>();
     private final Map<Integer, Integer> queenCount = new HashMap<>();
-    private final Map<Integer, Integer> pawnCount = new HashMap<>(); 
+    private final Map<Integer, Integer> pawnCount = new HashMap<>();
     private final Map<Integer, Integer> rookCount = new HashMap<>();
-    
-    
-    
 
     private final ArrayList<Piece> resultPieces = new ArrayList<>();
 
@@ -70,7 +67,7 @@ public class ChessPositionSetter extends JDialog {
 
     private void initLimits() {
         maxCounts.put(Types.KING, 2);
-        maxCounts.put(Types.QUEEN, 18); //with promotion max
+        maxCounts.put(Types.QUEEN, 18); // with promotion max
         maxCounts.put(Types.ROOK, 20);
         maxCounts.put(Types.BISHOP, 20);
         maxCounts.put(Types.KNIGHT, 20);
@@ -130,9 +127,9 @@ public class ChessPositionSetter extends JDialog {
         right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
 
         JComboBox<Types> pieceBox = new JComboBox<>(Types.values());
-        pieceBox.addActionListener(e -> selectedType = (Types)pieceBox.getSelectedItem());
+        pieceBox.addActionListener(e -> selectedType = (Types) pieceBox.getSelectedItem());
 
-        JComboBox<String> colorBox = new JComboBox<>(new String[]{"White", "Black"});
+        JComboBox<String> colorBox = new JComboBox<>(new String[] { "White", "Black" });
         colorBox.addActionListener(e -> selectedColor = colorBox.getSelectedIndex());
 
         JCheckBox wk = new JCheckBox("White O-O", true);
@@ -140,7 +137,7 @@ public class ChessPositionSetter extends JDialog {
         JCheckBox bk = new JCheckBox("Black O-O", true);
         JCheckBox bq = new JCheckBox("Black O-O-O", true);
 
-        JComboBox<String> turnBox = new JComboBox<>(new String[]{"White to move", "Black to move"});
+        JComboBox<String> turnBox = new JComboBox<>(new String[] { "White to move", "Black to move" });
         turnBox.addActionListener(e -> turnColor = turnBox.getSelectedIndex());
 
         JButton confirm = new JButton("Confirm position");
@@ -169,12 +166,12 @@ public class ChessPositionSetter extends JDialog {
     // ================= LOGIC =================
 
     private void placePiece(int row, int col) {
-        
-    // ===== Pawn position validation =====
+
+        // ===== Pawn position validation =====
         if (selectedType == Types.PAWN) {
-            if(row == 0 || row == 7){
+            if (row == 0 || row == 7) {
                 JOptionPane.showMessageDialog(this,
-                "Pawn can be placed only on 2nd–7th rank!");
+                        "Pawn can be placed only on 2nd–7th rank!");
                 return;
             }
         }
@@ -189,41 +186,40 @@ public class ChessPositionSetter extends JDialog {
             return;
         }
 
-        if (selectedType == Types.KNIGHT){
+        if (selectedType == Types.KNIGHT) {
             int pawns = pawnCount.get(selectedColor);
             int maxKnights = (pawns == 8) ? 2 : 10;
-                
-            if(knightCount.get(selectedColor) >= maxKnights){
-                JOptionPane.showMessageDialog(this,"Not enough promoted pawns for more knights!");
+
+            if (knightCount.get(selectedColor) >= maxKnights) {
+                JOptionPane.showMessageDialog(this, "Not enough promoted pawns for more knights!");
                 return;
-            }    
+            }
         }
-        
-        if (selectedType == Types.BISHOP){
-                int pawns = pawnCount.get(selectedColor);
-                int maxBishops = (pawns == 8) ? 2 : 10;
-                
-                if(bishopCount.get(selectedColor) >= maxBishops){
-                    JOptionPane.showMessageDialog(this,"Not enough promoted pawns for more bishops");
-                    return;
-                }   
+
+        if (selectedType == Types.BISHOP) {
+            int pawns = pawnCount.get(selectedColor);
+            int maxBishops = (pawns == 8) ? 2 : 10;
+
+            if (bishopCount.get(selectedColor) >= maxBishops) {
+                JOptionPane.showMessageDialog(this, "Not enough promoted pawns for more bishops");
+                return;
+            }
         }
-        
+
         if (selectedType == Types.QUEEN && queenCount.get(selectedColor) >= 9) {
             JOptionPane.showMessageDialog(this, "Each side can have at most 9 queens!");
             return;
         }
-        
+
         if (selectedType == Types.PAWN && pawnCount.get(selectedColor) >= 8) {
             JOptionPane.showMessageDialog(this, "Each side can have at most 8 pawns!");
             return;
         }
-        
-          if (selectedType == Types.ROOK && rookCount.get(selectedColor) >= 10) {
+
+        if (selectedType == Types.ROOK && rookCount.get(selectedColor) >= 10) {
             JOptionPane.showMessageDialog(this, "Each side can have at most 10 rooks!");
             return;
         }
-         
 
         if (currentCounts.get(selectedType) >= maxCounts.get(selectedType)) {
             JOptionPane.showMessageDialog(this, "Max count reached for " + selectedType);
@@ -235,42 +231,57 @@ public class ChessPositionSetter extends JDialog {
 
         Piece p;
         switch (selectedType) {
-            case KING:   p = new King(selectedColor, col, row, false); break;
-            case QUEEN:  p = new Queen(selectedColor, col, row, false); break;
-            case ROOK:   p = new Rook(selectedColor, col, row, false); break;
-            case BISHOP: p = new Bishop(selectedColor, col, row, false); break;
-            case KNIGHT: p = new Knight(selectedColor, col, row, false); break;
-            default:     p = new Pawn(selectedColor, col, row, false);
+            case KING:
+                p = new King(selectedColor, col, row, false);
+                break;
+            case QUEEN:
+                p = new Queen(selectedColor, col, row, false);
+                break;
+            case ROOK:
+                p = new Rook(selectedColor, col, row, false);
+                break;
+            case BISHOP:
+                p = new Bishop(selectedColor, col, row, false);
+                break;
+            case KNIGHT:
+                p = new Knight(selectedColor, col, row, false);
+                break;
+            default:
+                p = new Pawn(selectedColor, col, row, false);
+                System.out.println("King count white: " + kingCount.get(Chesswindowpanel.WHITE));
+        }
+        
+        // Aktualizace počtu figur
+        switch (selectedType) {
+            case KING:
+                kingCount.put(selectedColor, kingCount.get(selectedColor) + 1);
+                break;
+            case QUEEN:
+                queenCount.put(selectedColor, queenCount.get(selectedColor) + 1);
+                break;
+            case ROOK:
+                rookCount.put(selectedColor, rookCount.get(selectedColor) + 1);
+                break;
+            case BISHOP:
+                bishopCount.put(selectedColor, bishopCount.get(selectedColor) + 1);
+                break;
+            case KNIGHT:
+                knightCount.put(selectedColor, knightCount.get(selectedColor) + 1);
+                break;
+            case PAWN:
+                pawnCount.put(selectedColor, pawnCount.get(selectedColor) + 1);
+                break;
         }
 
-        if (selectedType == Types.KING)
-            kingCount.put(selectedColor, kingCount.get(selectedColor) + 1);
-
-        if (selectedType == Types.KNIGHT)
-            knightCount.put(selectedColor, knightCount.get(selectedColor) + 1);
-        
-        if(selectedType == Types.BISHOP)
-            bishopCount.put(selectedColor, bishopCount.get(selectedColor) + 1);
-        
-        if(selectedType == Types.QUEEN)
-            queenCount.put(selectedColor, queenCount.get(selectedColor) + 1);
-       
-        if(selectedType == Types.PAWN)
-            pawnCount.put(selectedColor, pawnCount.get(selectedColor) + 1);
-        
-         if(selectedType == Types.ROOK)
-            rookCount.put(selectedColor, rookCount.get(selectedColor) + 1);
-        
-
         resultPieces.add(p);
-        board [row][col].putClientProperty("piece", p);
+        board[row][col].putClientProperty("piece", p);
     }
 
     private void removePiece(int row, int col) {
         JButton b = board[row][col];
         Piece p = (Piece) b.getClientProperty("piece");
 
-        if (p == null) 
+        if (p == null)
             return;
 
         resultPieces.remove(p);
@@ -280,69 +291,74 @@ public class ChessPositionSetter extends JDialog {
             kingCount.put(p.color, kingCount.get(p.color) - 1);
 
         if (p.type == Types.KNIGHT)
-            knightCount.put(p.color, knightCount.get(p.color) - 1);      
-        
-        if(p.type == Types.BISHOP)
-            bishopCount.put(p.color,bishopCount.get(p.color) - 1);
-        
-        if(p.type == Types.QUEEN)
-            queenCount.put(p.color,queenCount.get(p.color) - 1);
-        
-        if(p.type == Types.PAWN)
-            pawnCount.put(p.color,pawnCount.get(p.color) - 1);
-        
-         if(p.type == Types.ROOK)
-            rookCount.put(p.color,rookCount.get(p.color) - 1);
+            knightCount.put(p.color, knightCount.get(p.color) - 1);
+
+        if (p.type == Types.BISHOP)
+            bishopCount.put(p.color, bishopCount.get(p.color) - 1);
+
+        if (p.type == Types.QUEEN)
+            queenCount.put(p.color, queenCount.get(p.color) - 1);
+
+        if (p.type == Types.PAWN)
+            pawnCount.put(p.color, pawnCount.get(p.color) - 1);
+
+        if (p.type == Types.ROOK)
+            rookCount.put(p.color, rookCount.get(p.color) - 1);
 
         b.setText("");
         b.putClientProperty("piece", null);
     }
-    
+
     private boolean isKingInCheckInPosition(int kingColor) {
-    Piece king = null;
+        Piece king = null;
 
-    for (Piece p : resultPieces) {
-        if (p.type == Types.KING && p.color == kingColor) {
-            king = p;
-            break;
-        }
-    }
-
-    if (king == null) return true; // safe
-
-    for (Piece p : resultPieces) {
-        if (p.color != kingColor) {
-            if (p.canMove(king.col, king.row)) {
-                return true;
+        for (Piece p : resultPieces) {
+            if (p.type == Types.KING && p.color == kingColor) {
+                king = p;
+                break;
             }
         }
-    }
-    return false;
-}
 
-    
+        if (king == null)
+            return true; // safe
+
+        for (Piece p : resultPieces) {
+            if (p.color != kingColor) {
+                if (p.canMove(king.col, king.row)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private String getSymbol() {
         switch (selectedType) {
-            case KING:   return selectedColor == 0 ? "♔" : "♚";
-            case QUEEN:  return selectedColor == 0 ? "♕" : "♛";
-            case ROOK:   return selectedColor == 0 ? "♖" : "♜";
-            case BISHOP: return selectedColor == 0 ? "♗" : "♝";
-            case KNIGHT: return selectedColor == 0 ? "♘" : "♞";
+            case KING:
+                return selectedColor == 0 ? "♔" : "♚";
+            case QUEEN:
+                return selectedColor == 0 ? "♕" : "♛";
+            case ROOK:
+                return selectedColor == 0 ? "♖" : "♜";
+            case BISHOP:
+                return selectedColor == 0 ? "♗" : "♝";
+            case KNIGHT:
+                return selectedColor == 0 ? "♘" : "♞";
             case PAWN:
-            default:     return selectedColor == 0 ? "♙" : "♟";
+            default:
+                return selectedColor == 0 ? "♙" : "♟";
         }
     }
 
     private void applyPosition() {
         if (kingCount.get(Chesswindowpanel.WHITE) != 1 ||
-            kingCount.get(Chesswindowpanel.BLACK) != 1) {
+                kingCount.get(Chesswindowpanel.BLACK) != 1) {
 
-            JOptionPane.showMessageDialog(this, 
+            JOptionPane.showMessageDialog(this,
                     "Each side must have exactly one king!");
             return;
         }
-        
+
         Chesswindowpanel.boardPieces.clear();
         Chesswindowpanel.simBoardPieces.clear();
         Chesswindowpanel.boardPieces.addAll(resultPieces);
@@ -356,17 +372,17 @@ public class ChessPositionSetter extends JDialog {
 
         // ===== Check validity: king in check but not to move =====
         final int sideNotToMove = (turnColor == Chesswindowpanel.WHITE)
-        ? Chesswindowpanel.BLACK
-        : Chesswindowpanel.WHITE;
+                ? Chesswindowpanel.BLACK
+                : Chesswindowpanel.WHITE;
 
-       if(isKingInCheckInPosition(Chesswindowpanel.WHITE) ||
-               isKingInCheckInPosition(Chesswindowpanel.BLACK)){
-        
-        JOptionPane.showMessageDialog(this,
-        "King cannot be in check in a valid position!");
-        return;      
+        if (isKingInCheckInPosition(Chesswindowpanel.WHITE) ||
+                isKingInCheckInPosition(Chesswindowpanel.BLACK)) {
+
+            JOptionPane.showMessageDialog(this,
+                    "King cannot be in check in a valid position!");
+            return;
         }
-        
+
         dispose();
         parent.repaint();
     }
