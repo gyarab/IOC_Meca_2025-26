@@ -4,7 +4,7 @@
  */
 package Chess;
 
-import Chess.Pieces.piece.Pieces;
+import Chess.Pieces.piece.Piece;
 import Chess.Pieces.piece.Types;
 
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ public class PawnStructureAnalyzer {
                 + calculateIsolatedPawnPenalty(playerPawns);
     }
 
-    private static Collection<Pieces> calculatePlayerPawns(final Player player) {
+    private static Collection<Piece> calculatePlayerPawns(final Player player) {
         final Chessboard board = player.getBoard();
         final int[] activeIndexes = player.getActivePieces();
-        final List<Pieces> pawns = new ArrayList();
+        final List<Piece> pawns = new ArrayList();
         for (final int index : activeIndexes) {
-            final Pieces piece = board.getPiece(index);
+            final Piece piece = board.getPiece(index);
             if (piece.getPieceType() == Types.PAWN) {
                 pawns.add(piece);
             }
@@ -83,7 +83,7 @@ public class PawnStructureAnalyzer {
 
     private int[] createPawnColumnTable(final Player player) {
         final int[] table = new int[8];
-        for (final Pieces playerPawn : calculatePlayerPawns(player)) {
+        for (final Piece playerPawn : calculatePlayerPawns(player)) {
             table[playerPawn.getPiecePosition() % 8]++;
         }
         return table;
