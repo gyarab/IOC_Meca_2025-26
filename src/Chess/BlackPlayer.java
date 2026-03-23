@@ -4,12 +4,15 @@
  */
 package Chess;
 
+import Chess.Move.KingSideCastleMove;
+import Chess.Move.QueenSideCastleMove;
 /**
  *
  * @author mecova
  */
 import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Piece;
+import Chess.Pieces.piece.Rook;
 import Chess.Pieces.piece.Types;
 
 import java.util.ArrayList;
@@ -46,7 +49,7 @@ public final class BlackPlayer extends Player {
                         kingSideRook.getPieceType() == Types.ROOK) {
                     if (!BoardUtils.isKingPawnTrap(this.board, this.playerKing, 12)) {
                         kingCastles.add(
-                                new KingSideCastleMove(this.board, this.playerKing, 6, (Rook) kingSideRook, 5));
+                                new KingSideCastleMove(this.board, this.playerKing,6, (Rook) kingSideRook, 5));
 
                     }
                 }
@@ -58,7 +61,7 @@ public final class BlackPlayer extends Player {
                 if (queenSideRook != null && queenSideRook.isFirstMove() &&
                         BoardUtils.calculateAttacksOnTile(2, opponentLegals).isEmpty() &&
                         BoardUtils.calculateAttacksOnTile(3, opponentLegals).isEmpty() &&
-                        queenSideRook.getPieceType() == ROOK) {
+                        queenSideRook.getPieceType() == Types.ROOK) {
                     if (!BoardUtils.isKingPawnTrap(this.board, this.playerKing, 12)) {
                         kingCastles.add(
                                 new QueenSideCastleMove(this.board, this.playerKing, 2, (Rook) queenSideRook, 3));
