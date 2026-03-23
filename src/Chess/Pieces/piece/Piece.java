@@ -371,10 +371,6 @@ public abstract class Piece {
         }
     }
 
-    public Iterable<Move> getLegalMoves(Piece[][] boardPieces) {
-        return null; //TODO: more work here
-    }
-
      @Override
     public String toString() {
         //TODO dodelat
