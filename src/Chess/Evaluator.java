@@ -26,7 +26,7 @@ public class Evaluator {
                     int pieceScore = materialValue + positionalValue;
 
                     // Penalizace ohrožení figurky
-                    if (isPieceAttacked(piece, boardPieces)) {
+                    if (isPieceAttacked(piece, boardPieces, board)) {
                         pieceScore -= 10; // každá ohrožená figurka = -10
                     }
 
@@ -49,60 +49,62 @@ public class Evaluator {
         return score; // kladné = výhoda bílé, záporné = výhoda černé
     }
 
-    private static int getPositionalValue(Piece piece, int row, int col) {
-
+     private static int getPositionalValue(Piece piece, int col, int row) {
         switch (piece.getType()) {
             case PAWN:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.PAWN_TABLE[row][col]
-                        : PSQT.PAWN_TABLE[7 - row][col];
+                        ? PSQT.PAWN_TABLE[col][row]
+                        : PSQT.PAWN_TABLE[col][7-row];
 
             case KNIGHT:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.KNIGHT_TABLE[row][col]
-                        : PSQT.KNIGHT_TABLE[7 - row][col];
+                        ? PSQT.KNIGHT_TABLE[col][row]
+                        : PSQT.KNIGHT_TABLE[col][7 - row];
 
             case BISHOP:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.BISHOP_TABLE[row][col]
-                        : PSQT.BISHOP_TABLE[7 - row][col];
+                        ? PSQT.BISHOP_TABLE[col][row]
+                        : PSQT.BISHOP_TABLE[col][7 - row];
 
             case ROOK:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.ROOK_TABLE[row][col]
-                        : PSQT.ROOK_TABLE[7 - row][col];
+                        ? PSQT.ROOK_TABLE[col][row]
+                        : PSQT.ROOK_TABLE[col][7 - row];
 
             case QUEEN:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.QUEEN_TABLE[row][col]
-                        : PSQT.QUEEN_TABLE[7 - row][col];
+                        ? PSQT.QUEEN_TABLE[col][row]
+                        : PSQT.QUEEN_TABLE[col][7 - row];
 
             case KING:
                 return piece.getPieceAllegiance() == Alliance.WHITE
-                        ? PSQT.KING_TABLE[row][col]
-                        : PSQT.KING_TABLE[7 - row][col];
+                        ? PSQT.KING_TABLE[col][row]
+                        : PSQT.KING_TABLE[col][7 - row];
 
             default:
                 return 0;
         }
     }
 
-    private static boolean isPieceAttacked(Piece piece, Piece[][] boardPieces) {
+    private static boolean isPieceAttacked(Piece piece, Piece[][] boardPieces, Chessboard board) {
         // aliance nepřítele
         Alliance enemy = piece.getPieceAllegiance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Piece attacker = boardPieces[row][col];
+                
                 if (attacker != null && attacker.getPieceAllegiance() == enemy) {
-                    for (Move move : attacker.getLegalMoves(boardPieces)) {
+                    
+                    // ZDE POUŽIJEME SPRÁVNOU METODU Z ENGINU:
+                    for (Move move : attacker.getLegalMoves(board)) {
+                        
                         // pokud tah protivníka cílí na tuto figurku
-                        int x = piece.getCol();
-                        int y = piece.getRow();
-                        if (move.getDestinationRow() == piece.getRow() &&
-                                move.getDestinationCol() == piece.getCol()) {
+                        if (move.getDestinationRow() == piece.getRow()
+                                && move.getDestinationCol() == piece.getCol()) {
                             return true;
                         }
+                        
                     }
                 }
             }
