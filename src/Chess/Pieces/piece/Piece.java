@@ -14,6 +14,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
+
 import javax.imageio.ImageIO;
 
 /**
@@ -30,22 +32,34 @@ public abstract class Piece {
     public int color;
     public Piece hittingP;
     public Piece activeP;
+    public int piecePosition;
     public boolean hasmoved, twoStepped;
     private final boolean isFirstMove;
     private final int cachedHashCode;
-    final int piecePosition;
-
+   
+    // GUI konstruktor volající ten hlavní
     public Piece(int color, int col, int row, final boolean isFirstMove) {
-        this.color = color;
-        this.col = col;
-        this.row = row;
-        x = getX(col);
-        y = getY(row);
-        this.pceCol = col;
-        this.pceRow = row;
+        this(color == Chesswindowpanel.WHITE ? Alliance.WHITE : Alliance.BLACK,
+                row * 8 + col,
+                isFirstMove);
+    }
+
+    //ENGINE konstruktor
+    public Piece(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        this.pieceAlliance = alliance;
+        // ADD THIS: Sync the int color with the Alliance
+        this.color = alliance.isWhite() ? Chesswindowpanel.WHITE : Chesswindowpanel.BLACK;
+        this.piecePosition = piecePosition;
+        System.out.println("Pozice figurky je:" + piecePosition);
         this.isFirstMove = isFirstMove;
+        // spočítáme col a row z indexu 0..63
+        this.row = piecePosition / 8;
+        this.col = piecePosition % 8;
+        this.pceCol = this.col;
+        this.pceRow = this.row;
+        this.x = getX(this.col);
+        this.y = getY(this.row);
         this.cachedHashCode = computeHashCode();
-        this.piecePosition = getPiecePosition();
     }
 
     public BufferedImage getImage(String imagePath) {
@@ -69,14 +83,14 @@ public abstract class Piece {
 
     }
 
-    public int getCol(int x) {
+    public int getCol() {
         //I addded HALF_SQUARE_SIZE because this piece's x and y is the top left and that is not correct, now after adding HALF_SQUARE_SIZE
         //program will be know, where the object is
         // and to detect its col and row based on the center point of the piece
         return (x + Chessboard.HALF_SQUARE_SIZE) / Chessboard.SQUARE_SIZE;
     }
 
-    public int getRow(int y) {
+    public int getRow() {
         return (y + Chessboard.HALF_SQUARE_SIZE) / Chessboard.SQUARE_SIZE;
     }
 
@@ -125,14 +139,14 @@ public abstract class Piece {
         return type.getPieceValue();
     } 
 
-    public Collection<Move> getLegalMoves(Piece[][] boardPieces) {
-        Chessboard board = new Chessboard(new Builder());
-        System.out.println("Legální tahy jsou:" + board.getAllLegalMoves());    
-        return board.getAllLegalMoves();
+    public Collection<Move> getLegalMoves(Chessboard board) {
+        
+        System.out.println("Legální thay jsou:" + calculateLegalMoves(board));
+
+        return calculateLegalMoves(board);
 
     }
     
-
     public abstract int locationBonus();
 
     public abstract Piece getMovedPiece(Move move);
@@ -158,6 +172,9 @@ public abstract class Piece {
     }
 
     private int computeHashCode() {
+        if (type == null) {
+            return 0;
+        }
         int result = this.type.hashCode();
         result = 31 * result + this.pieceAlliance.hashCode();
         result = 31 * result + this.piecePosition;
@@ -176,9 +193,12 @@ public abstract class Piece {
         //So I update it's X and Y based on it's current col and row
         x = getX(col);
         y = getY(row);
-        pceCol = getCol(x); //also I update these previous col and row since the move has been confirmed
+        pceCol = getCol(); //also I update these previous col and row since the move has been confirmed
         //and the piece has moved to a new square
-        pceRow = getRow(y);
+        pceRow = getRow();
+
+        // PŘIDEJ TENTO ŘÁDEK - ZÁCHRANA PŘED TELEPORTACÍ:
+        this.piecePosition = this.pceRow * 8 + this.pceCol;
     }
 
     public void resetPosition() {
@@ -219,20 +239,27 @@ public abstract class Piece {
         return null;
     }
 
-    public boolean isValidSquare(int targetCol, int targetRow) {
+        public boolean isValidSquare(int targetCol, int targetRow) {
 
-        hittingP = getHittingP(targetCol, targetRow);
-
-        if (hittingP == null) { //this square is not occupied by opponent's piece, so it's VACANT
-            return true;
-        } else { //this square is occupied
-            if (hittingP.color != this.color) { //If the color is different, it can be captured
-                return true;
-            } else {   //If the color is the same, the player cannot move to this square
-                hittingP = null;
+        // Získáme figurku, která případně stojí na cílovém poli
+        hittingP = null;
+        for (Piece piece : Chesswindowpanel.simPieces) {
+            if (piece.col == targetCol && piece.row == targetRow && piece != this) {
+                hittingP = piece;
+                break;
             }
         }
-        return false;
+
+        if (hittingP == null) { // Pole je prázdné
+            return true;
+        } else { // Pole je obsazené
+            if (hittingP.color != this.color) { // Můžeme vzít nepřátelskou
+                return true;
+            } else {   // Vlastní figurka, sem nemůžeme
+                hittingP = null;
+                return false; // Přidáno false!
+            }
+        }
     }
 
     public boolean pieceIsOnStraightLine(int targetCol, int targetRow) {
@@ -344,7 +371,17 @@ public abstract class Piece {
         }
     }
 
-}
+    public Iterable<Move> getLegalMoves(Piece[][] boardPieces) {
+        return null; //TODO: more work here
+    }
 
+     @Override
+    public String toString() {
+        //TODO dodelat
+        return type.toString();
+    }
+
+    }
+    
 
 
