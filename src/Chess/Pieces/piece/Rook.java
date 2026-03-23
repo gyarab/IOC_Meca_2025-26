@@ -28,10 +28,13 @@ public class Rook extends Piece {
     private final static Map<Integer, MoveUtils.Line[]> PRECOMPUTED_CANDIDATES = computeCandidates();
     private final Alliance pieceAlliance = Alliance.WHITE;
 
-    public Rook(int color, int col, int row, final boolean isFirstMove) {
-        super(color, col, row, true);
-
-        type = Types.ROOK;
+     // GUI konstruktor
+    public Rook(int color, int col, int row, boolean isGui) {
+        super(color, col, row, isGui);
+        this.type = Types.ROOK;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
 
         if (color == Chesswindowpanel.WHITE) {
             image = getImage("/Chess/Pieces/piece/w-rook");
@@ -39,6 +42,25 @@ public class Rook extends Piece {
             image = getImage("/Chess/Pieces/piece/b-rook");
         }
     }
+    
+     // ENGINE delegátor, pokud chceš convenience overload
+    public Rook(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition, false);
+    }
+
+    // ENGINE konstruktor
+    public Rook(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition, isFirstMove);
+
+        type = Types.ROOK;
+
+        if (alliance == Alliance.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-rook");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-rook");
+        }
+    }
+
 
     @Override
     public boolean canMove(int targetCol, int targetRow) {
@@ -127,7 +149,7 @@ public class Rook extends Piece {
     }
 
     public Piece getMovedPiece(Move move) {
-        return activeP;
+        return new Rook(this.pieceAlliance, move.getDestinationCoordinate(), false); 
     }
 
 
