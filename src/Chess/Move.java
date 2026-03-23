@@ -1,9 +1,10 @@
 package Chess;
 
 import Chess.Chessboard.Builder;
-import Chess.Pieces.piece.Bishop;
+import Chess.Pieces.piece.King;
 import Chess.Pieces.piece.Pawn;
 import Chess.Pieces.piece.Piece;
+import Chess.Pieces.piece.Rook;
 import java.util.Objects;
 
 public class Move {
@@ -15,7 +16,6 @@ public class Move {
 
     public Piece capturedPiece;
     public Piece piece;
-    public Piece aThis;
     public int value;
     private int x;
     private int y;
@@ -37,12 +37,11 @@ public class Move {
         this.isFirstMove = false;
     }
 
-    public Move(final Chessboard board, Piece aThis, int col, int row) {
+    public Move(final Chessboard board, Piece piece, int col, int row) {
         this.board = board;
-        this.movedPiece = null;
-        this.aThis = aThis;
-        this.destinationCoordinate = 0; // default value
-        this.isFirstMove = false; // default value
+        this.movedPiece = piece;
+        this.destinationCoordinate = row * 8 + col;
+        this.isFirstMove = piece.isFirstMove();
     }
 
     public static class PawnPromotion
@@ -80,9 +79,10 @@ public class Move {
             return Objects.hash(super.hashCode(), decoratedMove, promotedPawn, promotionPiece);
         }
 
-        public Builder execute() {
+        @Override
+        public Chessboard execute() {
             final Chessboard pawnMovedBoard = this.decoratedMove.execute();
-            final Builder builder = new Builder();
+            final Chessboard.Builder builder = new Builder();
             final Piece[] boardConfig = pawnMovedBoard.getBoardCopy();
             final int[] currentActive = pawnMovedBoard.currentPlayer().getActivePieces();
             final int[] opponentActive = pawnMovedBoard.currentPlayer().getOpponent().getActivePieces();
@@ -107,16 +107,12 @@ public class Move {
 
     @Override
     public String toString() {
-        return BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
+        return movedPiece + BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = 31 * result + this.destinationCoordinate;
-        result = 31 * result + this.movedPiece.hashCode();
-        result = result + (isFirstMove ? 1 : 0);
-        return result;
+        return Objects.hash(getCurrentCoordinate(), destinationCoordinate, movedPiece);
     }
 
     @Override
@@ -135,7 +131,7 @@ public class Move {
             return false;
         }
 
-        final Move othMove = (Move) oth; // přetypovaná proměnná typu Object
+        final Move othMove = (Move) oth; // cast variable of type Object
 
         if (this.destinationCoordinate != othMove.destinationCoordinate) {
             return false;
@@ -190,6 +186,140 @@ public class Move {
         return this.destinationCoordinate % 8;
     }
 
+    static abstract class CastleMove extends Move {
+
+        final Rook castleRook;
+        final int castleRookDestination;
+
+        CastleMove(final Chessboard board,
+                final King movedKing,
+                final int destinationCoordinate,
+                final Rook castleRook,
+                final int castleRookDestination) {
+            super(board, movedKing, destinationCoordinate);
+            this.castleRook = castleRook;
+            this.castleRookDestination = castleRookDestination;
+        }
+
+        Rook getCastleRook() {
+            return this.castleRook;
+        }
+
+        @Override
+        public boolean isCastlingMove() {
+            return true;
+        }
+
+        @Override
+        public Chessboard execute() {
+            if (this.movedPiece == null) {
+                throw new RuntimeException(
+                        "Chyba: Pokus o vykonání tahu bez definované figurky (movedPiece je null) na pozici "
+                                + destinationCoordinate);
+            }
+            final Piece[] newBoardConfig = board.getBoardCopy();
+            newBoardConfig[this.movedPiece.getPiecePosition()] = null;
+            newBoardConfig[this.castleRook.getPiecePosition()] = null;
+            final Piece newKing = this.movedPiece.getMovedPiece(this);
+            newBoardConfig[this.destinationCoordinate] = newKing;
+            final Move syntheticMove = new MajorMove(this.board, this.castleRook, this.castleRookDestination);
+            final Piece newRook = this.castleRook.getMovedPiece(syntheticMove);
+            newBoardConfig[this.castleRookDestination] = newRook;
+            final Builder builder = new Builder();
+            return builder.setBoardConfiguration(newBoardConfig)
+                    .setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance())
+                    .build();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), castleRook, castleRookDestination);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof CastleMove)) {
+                return false;
+            }
+            final CastleMove otherCastleMove = (CastleMove) other;
+            return super.equals(otherCastleMove) && this.castleRook.equals(otherCastleMove.getCastleRook());
+        }
+    }
+
+    public static class KingSideCastleMove
+            extends CastleMove {
+
+        public KingSideCastleMove(final Chessboard board,
+                final King movedKing,
+                final int kingDestination,
+                final Rook castleRook,
+                final int rookDestination) {
+            super(board, movedKing, kingDestination, castleRook, rookDestination);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof KingSideCastleMove)) {
+                return false;
+            }
+            final KingSideCastleMove otherKingSideCastleMove = (KingSideCastleMove) other;
+            return super.equals(otherKingSideCastleMove)
+                    && this.castleRook.equals(otherKingSideCastleMove.getCastleRook());
+        }
+
+        @Override
+        public String toString() {
+            return "O-O";
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode());
+        }
+    }
+
+    public static class QueenSideCastleMove
+            extends CastleMove {
+
+        public QueenSideCastleMove(final Chessboard board,
+                final King pieceMoved,
+                final int kingDestination,
+                final Rook castleRook,
+                final int rookCastleDestination) {
+            super(board, pieceMoved, kingDestination, castleRook, rookCastleDestination);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof QueenSideCastleMove)) {
+                return false;
+            }
+            final QueenSideCastleMove otherQueenSideCastleMove = (QueenSideCastleMove) other;
+            return super.equals(otherQueenSideCastleMove)
+                    && this.castleRook.equals(otherQueenSideCastleMove.getCastleRook());
+        }
+
+        @Override
+        public String toString() {
+            return "O-O-O";
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode());
+        }
+
+    }
+
     static abstract class AttackMove
             extends Move {
 
@@ -205,7 +335,7 @@ public class Move {
 
         @Override
         public int hashCode() {
-            return this.attackedPiece.hashCode() + super.hashCode();
+            return Objects.hash(super.hashCode(), attackedPiece);
         }
 
         @Override
@@ -258,6 +388,35 @@ public class Move {
         public String toString() {
             return "Null Move";
         }
+
+    }
+
+    public static class PawnAttackMove
+            extends AttackMove {
+
+        public PawnAttackMove(final Chessboard board,
+                final Piece pieceMoved,
+                final int destinationCoordinate,
+                final Piece pieceAttacked) {
+            super(board, pieceMoved, destinationCoordinate, pieceAttacked);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            return this == other || other instanceof PawnAttackMove && super.equals(other);
+        }
+
+        @Override
+        public String toString() {
+            return BoardUtils.INSTANCE.getPositionAtCoordinate(this.movedPiece.getPiecePosition()).charAt(0) + "x" +
+                    BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode());
+        }
+
     }
 
     public static class PawnMove
@@ -281,7 +440,7 @@ public class Move {
 
         @Override
         public int hashCode() {
-            return super.hashCode();
+            return Objects.hash(super.hashCode());
         }
 
     }
@@ -311,9 +470,36 @@ public class Move {
 
     public Chessboard execute() {
         final Chessboard.Builder builder = new Chessboard.Builder();
-        return builder.setBoardConfiguration(newBoardConfig)
-                .setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance())
-                .build();
+
+        // 1. Projdeme všech 64 políček staré desky jedno po druhém
+        Piece[] currentBoardConfig = this.board.getBoardPieces();
+        for (int i = 0; i < 64; i++) {
+            Piece currentPiece = currentBoardConfig[i];
+
+            if (currentPiece != null) {
+                // 2. Pokud to NENÍ figurka, kterou právě táhneme, a NENÍ to figurka, kterou
+                // bereme (pokud je to AttackMove), přidáme ji na novou desku.
+                // K tomu použijeme equals porovnání, nebo jednoduše porovnáme pozice.
+                if (!this.movedPiece.equals(currentPiece)) {
+                    // Zkontrolujeme, zda se nejedná o útočný tah, který tuto figurku právě bere
+                    if (this.isAttack() && this.getAttackedPiece().equals(currentPiece)) {
+                        // Tuto figurku bereme, takže ji NEPŘIDÁVÁME na novou desku
+                    } else {
+                        // Není to pohnutá ani sebraná figurka, zachováme ji
+                        builder.setPiece(currentPiece);
+                    }
+                }
+            }
+        }
+
+        // 3. Umístíme pohnutou figurku na její nové políčko
+        builder.setPiece(this.movedPiece.getMovedPiece(this));
+
+        // 4. Předáme tah soupeři
+        builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+
+        // 5. Postavíme novou šachovnici
+        return builder.build();
     }
 
     public Chessboard undo() {
@@ -324,7 +510,7 @@ public class Move {
                 .build();
     }
 
-     String disambiguation() {
+    String disambiguation() {
         final Piece movedP = this.getMovedPiece();
         final String from = BoardUtils.INSTANCE.getPositionAtCoordinate(this.getCurrentCoordinate());
         final char fromFile = from.charAt(0);
@@ -379,24 +565,25 @@ public class Move {
 
         @Override
         public int hashCode() {
-           return super.hashCode();
+            return Objects.hash(super.hashCode());
         }
 
         @Override
         public String toString() {
             return movedPiece.getPieceType().toString() + disambiguation()
                     + BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
-        }   
+        }
     }
 
-        public static class MajorAttackMove
+    public static class MajorAttackMove
             extends AttackMove {
 
         private final Piece attackedPiece = super.attackedPiece;
-        
-        public MajorAttackMove(final Chessboard board, final Piece pieceMoved, final int destinationCoordinate, final Piece pieceAttacked) {
-            super(board, pieceMoved, destinationCoordinate,pieceAttacked);
-            
+
+        public MajorAttackMove(final Chessboard board, final Piece pieceMoved, final int destinationCoordinate,
+                final Piece pieceAttacked) {
+            super(board, pieceMoved, destinationCoordinate, pieceAttacked);
+
         }
 
         @Override
@@ -407,13 +594,13 @@ public class Move {
         @Override
         public String toString() {
             return movedPiece.getPieceType() +
-                              disambiguation() + "x" +
-                              BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
+                    disambiguation() + "x" +
+                    BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
         }
 
         @Override
         public int hashCode() {
-            return this.attackedPiece.hashCode();
+            return Objects.hash(super.hashCode(), attackedPiece);
         }
     }
 
