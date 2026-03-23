@@ -13,12 +13,12 @@ import Chess.Pieces.piece.Types;
  */
 public class Evaluator {
 
-    public static int evaluateBoard(Piece[][] board) {
+    public static int evaluateBoard(final Piece[][] boardPieces, final Chessboard board) {
         int score = 0;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Piece piece = board[row][col];
+                Piece piece = boardPieces[row][col];
                 if (piece != null) {
                     int materialValue = piece.getType().getPieceValue();
                     int positionalValue = getPositionalValue(piece, row, col);
@@ -26,7 +26,7 @@ public class Evaluator {
                     int pieceScore = materialValue + positionalValue;
 
                     // Penalizace ohrožení figurky
-                    if (isPieceAttacked(piece, board)) {
+                    if (isPieceAttacked(piece, boardPieces)) {
                         pieceScore -= 10; // každá ohrožená figurka = -10
                     }
 
@@ -43,8 +43,8 @@ public class Evaluator {
         }
 
         // Bezpečnost krále
-        score += evaluateKingSafety(board, Alliance.WHITE);
-        score -= evaluateKingSafety(board, Alliance.BLACK);
+        score += evaluateKingSafety(boardPieces, Alliance.WHITE);
+        score -= evaluateKingSafety(boardPieces, Alliance.BLACK);
 
         return score; // kladné = výhoda bílé, záporné = výhoda černé
     }
@@ -87,20 +87,20 @@ public class Evaluator {
         }
     }
 
-    private static boolean isPieceAttacked(Piece piece, Piece[][] board) {
+    private static boolean isPieceAttacked(Piece piece, Piece[][] boardPieces) {
         // aliance nepřítele
         Alliance enemy = piece.getPieceAllegiance() == Alliance.WHITE ? Alliance.BLACK : Alliance.WHITE;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Piece attacker = board[row][col];
+                Piece attacker = boardPieces[row][col];
                 if (attacker != null && attacker.getPieceAllegiance() == enemy) {
-                    for (Move move : attacker.getLegalMoves(board)) {
+                    for (Move move : attacker.getLegalMoves(boardPieces)) {
                         // pokud tah protivníka cílí na tuto figurku
-                        int x = piece.getCol(col);
-                        int y = piece.getRow(row);
-                        if (move.getDestinationRow() == piece.getRow(y) &&
-                                move.getDestinationCol() == piece.getCol(x)) {
+                        int x = piece.getCol();
+                        int y = piece.getRow();
+                        if (move.getDestinationRow() == piece.getRow() &&
+                                move.getDestinationCol() == piece.getCol()) {
                             return true;
                         }
                     }
