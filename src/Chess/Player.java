@@ -32,6 +32,7 @@ public abstract class Player {
         }
         playerLegals.addAll(calculateKingCastles(playerLegals, opponentLegals));
         this.legalMoves = Collections.unmodifiableCollection(playerLegals);
+        System.out.println("Legální tahy pro hráče jsou tyto:" + legalMoves);
     }
 
     public Chessboard getBoard() {
