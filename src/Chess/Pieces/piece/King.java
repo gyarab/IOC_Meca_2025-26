@@ -5,6 +5,7 @@
  */
 package Chess.Pieces.piece;
 
+import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
@@ -24,10 +25,13 @@ public class King extends Piece {
     private boolean kingSideCastleCapable;
     private boolean queenSideCastleCapable;
 
-    public King(int color, int col, int row, final boolean isFirstMove) {
-        super(color, col, row, true);
-
-        type = Types.KING;
+     // GUI konstruktor
+    public King(int color, int col, int row, boolean isGui) {
+        super(color, col, row, isGui);
+        this.type = Types.KING;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
 
         if (color == Chesswindowpanel.WHITE) {
             image = getImage("/Chess/Pieces/piece/w-king");
@@ -35,6 +39,25 @@ public class King extends Piece {
             image = getImage("/Chess/Pieces/piece/b-king");
         }
     }
+    
+     // ENGINE delegátor, pokud chceš convenience overload
+    public King(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition, false);
+    }
+
+    // ENGINE konstruktor
+    public King(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition, isFirstMove);
+
+        type = Types.KING;
+
+        if (alliance == Alliance.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-king");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-king");
+        }
+    }
+
 
     // I pass the col and the row of a square and check if this King can move to
     // this square
@@ -139,15 +162,13 @@ public class King extends Piece {
 
     @Override
     public int locationBonus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return this.pieceAlliance.kingBonus(this.piecePosition);   
     }
 
     @Override
     public Piece getMovedPiece(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        return new King(this.pieceAlliance,move.getDestinationCoordinate(),false);   
+    }    
 
     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
