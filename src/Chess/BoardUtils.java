@@ -40,7 +40,71 @@ public enum BoardUtils {
     public static final int NUM_TILES_PER_ROW = 8;
     public static final int NUM_TILES = 64;
 
-     // IMPROVED Rook tables - favor central files and 7th rank
+     // Pawn tables remain the same (8/10 rating)
+    public final static int[] WHITE_PAWN_PREFERRED_COORDINATES = {
+            0,  0,  0,  0,  0,  0,  0,  0,
+            90, 90, 90, 90, 90, 90, 90, 90,
+            30, 30, 40, 60, 60, 40, 30, 30,
+            10, 10, 20, 40, 40, 20, 10, 10,
+            5,  5, 10, 20, 20, 10,  5,  5,
+            0,  0,  0,-10,-10,  0,  0,  0,
+            5, -5,-10,  0,  0,-10, -5,  5,
+            0,  0,  0,  0,  0,  0,  0,  0
+    };
+    public final static int[] BLACK_PAWN_PREFERRED_COORDINATES = {
+            0,  0,  0,  0,  0,  0,  0,  0,
+            5, -5,-10,  0,  0,-10, -5,  5,
+            0,  0,  0,-10,-10,  0,  0,  0,
+            5,  5, 10, 20, 20, 10,  5,  5,
+            10, 10, 20, 40, 40, 20, 10, 10,
+            30, 30, 40, 60, 60, 40, 30, 30,
+            90, 90, 90, 90, 90, 90, 90, 90,
+            0,  0,  0,  0,  0,  0,  0,  0
+    };
+    // Knight tables remain the same (7/10 rating)
+    public final static int[] WHITE_KNIGHT_PREFERRED_COORDINATES = {
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50
+    };
+    public final static int[] BLACK_KNIGHT_PREFERRED_COORDINATES = {
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50,
+    };
+    // IMPROVED Bishop tables - favor long diagonals and fianchetto positions
+    public final static int[] WHITE_BISHOP_PREFERRED_COORDINATES = {
+            -20,-10,-10,-10,-10,-10,-10,-20,
+            -10,  5,  0,  0,  0,  0,  5,-10,
+            -10, 10, 10, 10, 10, 10, 10,-10,
+            -10,  0, 10, 15, 15, 10,  0,-10,
+            -10,  5, 10, 15, 15, 10,  5,-10,
+            -10,  0, 10, 10, 10, 10,  0,-10,
+            -10, 10,  5,  0,  0,  5, 10,-10,  // Fianchetto bonus
+            -20,-10,-10,-10,-10,-10,-10,-20
+    };
+    public final static int[] BLACK_BISHOP_PREFERRED_COORDINATES = {
+            -20,-10,-10,-10,-10,-10,-10,-20,
+            -10, 10,  5,  0,  0,  5, 10,-10,  // Fianchetto bonus
+            -10,  0, 10, 10, 10, 10,  0,-10,
+            -10,  5, 10, 15, 15, 10,  5,-10,
+            -10,  0, 10, 15, 15, 10,  0,-10,
+            -10, 10, 10, 10, 10, 10, 10,-10,
+            -10,  5,  0,  0,  0,  0,  5,-10,
+            -20,-10,-10,-10,-10,-10,-10,-20
+    };
+
+      // IMPROVED Rook tables - favor central files and 7th rank
     public final static int[] WHITE_ROOK_PREFERRED_COORDINATES = {
         0, 0, 0, 0, 0, 0, 0, 0,
         5, 10, 10, 10, 10, 10, 10, 5,
@@ -62,6 +126,50 @@ public enum BoardUtils {
         5, 10, 10, 10, 10, 10, 10, 5,
         0, 0, 0, 5, 5, 0, 0, 0 // Back rank connection bonus
     };
+
+       // IMPROVED Queen tables - asymmetric, favors kingside and mobility
+    public final static int[] WHITE_QUEEN_PREFERRED_COORDINATES = {
+            -20,-10,-10, -5, -5,-10,-10,-20,
+            -10,  0,  0,  0,  0,  5,  0,-10,  // Slight kingside preference
+            -10,  0,  5,  5,  5,  5,  5,-10,
+            -5,  0,  5,  5,  5,  5,  0, -5,
+            0,  0,  5,  5,  5,  5,  0, -5,
+            -10,  5,  5,  5,  5,  5,  0,-10,
+            -10,  0,  5,  0,  0,  0,  0,-10,
+            -20,-10,-10, -5, -5,-10,-10,-20
+    };
+    public final static int[] BLACK_QUEEN_PREFERRED_COORDINATES = {
+            -20,-10,-10, -5, -5,-10,-10,-20,
+            -10,  0,  5,  0,  0,  0,  0,-10,
+            -10,  5,  5,  5,  5,  5,  0,-10,
+            0,  0,  5,  5,  5,  5,  0, -5,
+            -5,  0,  5,  5,  5,  5,  0, -5,
+            -10,  0,  5,  5,  5,  5,  5,-10,
+            -10,  0,  0,  0,  0,  5,  0,-10,  // Slight kingside preference
+            -20,-10,-10, -5, -5,-10,-10,-20
+    };
+    
+      // IMPROVED King tables - balanced for safety and endgame activity
+    public final static int[] WHITE_KING_PREFERRED_COORDINATES = {
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -20,-30,-30,-40,-40,-30,-30,-20,
+            -10,-20,-20,-20,-20,-20,-20,-10,
+            20, 20,  0,  0,  0,  0, 20, 20,   // Castling positions
+            20, 30, 10,  0,  0, 10, 30, 20    // g1/b1 strongly preferred
+    };
+    public final static int[] BLACK_KING_PREFERRED_COORDINATES = {
+            20, 30, 10,  0,  0, 10, 30, 20,   // g8/b8 strongly preferred
+            20, 20,  0,  0,  0,  0, 20, 20,   // Castling positions
+            -10,-20,-20,-20,-20,-20,-20,-10,
+            -20,-30,-30,-40,-40,-30,-30,-20,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30
+    };  
     
      private static List<Boolean> initColumn(int columnNumber) {
         final Boolean[] column = new Boolean[NUM_TILES];
