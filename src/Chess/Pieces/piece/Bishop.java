@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
@@ -18,17 +19,40 @@ import Chess.Move;
  */
 public class Bishop extends Piece {
     
-    public Bishop(int color, int col, int row, final boolean isFistMove) {
-        super(color, col, row, true);
-        
-        type = Types.BISHOP;
+    // GUI konstruktor
+    public Bishop(int color, int col, int row, boolean isGui) {
+        super(color, col, row, isGui);
+        this.type = Types.BISHOP;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
+
+        if (color == Chesswindowpanel.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-bishop");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-bishop");
+        }
+    }
     
-    if(color == Chesswindowpanel.WHITE) {
-         image = getImage("/Chess/Pieces/piece/w-bishop");
-    } else {
-        image = getImage("/Chess/Pieces/piece/b-bishop");
-    }   
-}
+     // ENGINE delegátor, pokud chceš convenience overload
+    public Bishop(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition, false);
+    }
+
+    // ENGINE konstruktor
+    public Bishop(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition, isFirstMove);
+
+        type = Types.BISHOP;
+
+        if (alliance == Alliance.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-bishop");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-bishop");
+        }
+    }
+
+
     @Override
   public boolean canMove(int targetCol, int targetRow){
      if(isWithinBoard(targetCol, targetRow)&& isSameSquare(targetCol, targetRow) == false){
@@ -44,12 +68,12 @@ public class Bishop extends Piece {
 
   @Override
     public int locationBonus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+         return this.pieceAlliance.bishopBonus(this.piecePosition);   
+     }
 
     @Override
     public Piece getMovedPiece(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return new Bishop(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
 
     @Override
