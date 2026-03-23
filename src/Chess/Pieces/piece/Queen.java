@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package Chess.Pieces.piece;
+import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
@@ -18,17 +19,41 @@ import java.util.List;
  */
 public class Queen extends Piece {
     
-    public Queen(int color, int col, int row, final boolean isFirstMove) {
-        super(color, col, row, true);
-        
-        type = Types.QUEEN;
+   
+    // GUI konstruktor
+    public Queen(int color, int col, int row, boolean isFirstMove) {
+        super(color, col, row, isFirstMove);
+        this.type = Types.QUEEN;
+        this.piecePosition = row * 8 + col;
+        this.pceCol = col;
+        this.pceRow = row;
+
+        if (color == Chesswindowpanel.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-queen");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-queen");
+        }
+    }
     
-    if(color == Chesswindowpanel.WHITE) {
-         image = getImage("/Chess/Pieces/piece/w-queen");
-    } else {
-        image = getImage("/Chess/Pieces/piece/b-queen");
-    }  
-}
+     // ENGINE delegátor, pokud chceš convenience overload
+    public Queen(final Alliance alliance, final int piecePosition) {
+        this(alliance, piecePosition,false);
+    }
+
+    // ENGINE konstruktor
+    public Queen(final Alliance alliance, final int piecePosition, final boolean isFirstMove) {
+        super(alliance, piecePosition, isFirstMove);
+
+        type = Types.QUEEN;
+
+        if (alliance == Alliance.WHITE) {
+            image = getImage("/Chess/Pieces/piece/w-queen");
+        } else {
+            image = getImage("/Chess/Pieces/piece/b-queen");
+        }
+    }
+
+
   @Override
   public boolean canMove(int targetCol, int targetRow){
       if(isWithinBoard(targetCol, targetRow)&& isSameSquare(targetCol, targetRow) == false){
@@ -51,12 +76,12 @@ public class Queen extends Piece {
 
     @Override
     public int locationBonus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    return this.pieceAlliance.queenBonus(this.piecePosition);
     }
 
     @Override
     public Piece getMovedPiece(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return new Queen(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
 
     @Override
