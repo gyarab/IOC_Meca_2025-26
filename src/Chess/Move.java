@@ -310,9 +310,6 @@ public class Move {
     }
 
     public Chessboard execute() {
-        final Piece[] newBoardConfig = board.getBoardCopy(); // i need to create this method in class Chessboard
-        newBoardConfig[this.movedPiece.getPiecePosition()] = null;
-        newBoardConfig[this.destinationCoordinate] = this.movedPiece.getMovedPiece(this);
         final Chessboard.Builder builder = new Chessboard.Builder();
         return builder.setBoardConfiguration(newBoardConfig)
                 .setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance())
