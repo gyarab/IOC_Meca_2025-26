@@ -12,6 +12,7 @@ import Chess.Alliance;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
+import Chess.Move.MajorAttackMove;
 
 /**
  *
@@ -76,44 +77,46 @@ public class Bishop extends Piece {
         return new Bishop(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
 
-    @Override
+     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-  
-    List<Move> legalMoves = new ArrayList<>();
 
-            int[][] directions = {
-                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
-            };
+        List<Move> legalMoves = new ArrayList<>();
 
-            for (int[] d : directions) {
+        int[][] directions = {
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
 
-                int col = pceCol;
-                int row = pceRow;
+        for (int[] d : directions) {
 
-                while (true) {
+            int columns = pceCol;
+            int rows = pceRow;
 
-                    col += d[0];
-                    row += d[1];
+            while (true) {
 
-                    if (col < 0 || col > 7 || row < 0 || row > 7) {
-                        break;
+                columns += d[0];
+                rows += d[1];
+
+                if (columns < 0 || columns > 7 || rows < 0 || rows > 7) {
+                    break;
+                }
+
+//                Piece target = board.getPiece(columns, rows);
+                int targetIndex = rows * 8 + columns;
+                Piece target = board.getPiece(targetIndex);
+
+                if (target == null) {
+                    legalMoves.add(new Move(board, this, columns, rows));
+                } else {
+
+                    if (target.color != this.color) {
+                        legalMoves.add(new MajorAttackMove(board, this, rows * 8 + columns, target));
                     }
 
-                    Piece target = board.getPiece(row, col);
-
-                    if (target == null) {
-                        legalMoves.add(new Move(board, this, col,row));
-                    } else {
-
-                        if (target.color != this.color) {
-                            legalMoves.add(new Move(board, this, col, row));
-                        }
-
-                        break;
-                    }
+                    break;
                 }
             }
-
-            return legalMoves;
         }
+
+        return legalMoves;
+    }
   }

@@ -29,7 +29,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -168,8 +167,14 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
         this.setFocusable(true);
         addMouseMotionListener(mouse);
         addMouseListener(mouse);
+        setUI(ui);
         setUpInitialPosition();
-        // zavolat initializeEvaluation
+        //testCheckmate();
+        //testPosition();
+        //testIllegalmove();
+        //testPromoting()
+        //zavolat initializeEvaluation
+        setUpInitialPosition();
         copyPieces(pieces, simPieces);
         initButtons();
         initKeyBindings(this);
@@ -406,6 +411,24 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
         addPieceCorrectly(new King(BLACK, 1, 6, false));
     }
 
+    public void testCheckmate() {
+        addPieceCorrectly(new King(WHITE, 0, 7, false));
+        addPieceCorrectly(new King(BLACK, 7, 7, false));
+        pieces.add(new Queen(WHITE, 1, 6, false));
+        pieces.add(new Rook(WHITE, 2, 6, false));
+    }
+
+      public void testPosition() {
+        pieces.add(new Rook(WHITE, 0, 2, false));
+        pieces.add(new Rook(WHITE, 7, 1, false));
+        pieces.add(new Knight(WHITE, 6, 7, false));
+        pieces.add(new Bishop(BLACK, 3, 0, false));
+        addPieceCorrectly(new King(WHITE, 4, 7, false));
+        addPieceCorrectly(new King(BLACK, 4, 0, false));
+    }
+
+
+
     public void copyPieces(ArrayList<Piece> src, ArrayList<Piece> dst) {
         dst.clear();
         for (int i = 0; i < src.size(); i++) {
@@ -430,7 +453,7 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
 
     public void setUpInitialPosition() {
 
-        // White pieces
+        //White pieces
         addPieceCorrectly(new Rook(WHITE, 0, 7, false));
         addPieceCorrectly(new Rook(WHITE, 7, 7, false));
         addPieceCorrectly(new Knight(WHITE, 1, 7, false));
@@ -443,8 +466,7 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
         for (int i = 0; i < 8; i++) {
             addPieceCorrectly(new Pawn(WHITE, i, 6, false));
         }
-
-        // Black pieces
+        //Black pieces
         addPieceCorrectly(new Rook(BLACK, 0, 0, false));
         addPieceCorrectly(new Rook(BLACK, 7, 0, false));
         addPieceCorrectly(new Knight(BLACK, 1, 0, false));
@@ -457,7 +479,6 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
         for (int i = 0; i < 8; i++) {
             addPieceCorrectly(new Pawn(BLACK, i, 1, false));
         }
-
     }
 
     private void update() {

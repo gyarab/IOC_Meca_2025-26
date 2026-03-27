@@ -115,22 +115,78 @@ public class Pawn extends Piece{
     public Piece getMovedPiece(Move move) {
         return new Pawn(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
-
-    @Override
+    
+     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-        
 
         List<Move> legalMoves = new ArrayList<>();
 
+        // Směr pohybu: Bílý nahoru (-1), Černý dolů (+1)
         int direction = (color == Chesswindowpanel.WHITE) ? -1 : 1;
 
-        int row = pceRow + direction;
+        int targetRow = pceRow + direction;
+        int targetCol = pceCol;
 
-        if (board.getPiece(row, pceCol) == null) {
-            legalMoves.add(new Move(board, this, pceCol, row));
+        // 1. POHYB O 1 A 2 POLÍČKA DOPŘEDU
+        if (targetRow >= 0 && targetRow <= 7) {
+            int targetIndex = targetRow * 8 + targetCol; // Převod na 1D index
+
+            // Pěšec se může posunout dopředu JEN POKUD je políčko prázdné
+            if (board.getPiece(targetIndex) == null) {
+                // Přidání běžného tahu (uprav na instanci, kterou engine reálně bere, např. Move.MajorMove)
+                legalMoves.add(new Move(board, this, targetCol, targetRow));
+
+                // 2. Pohyb o 2 políčka ze startovní čáry 
+                // Zkontrolujeme, zda stojí na výchozí řadě (bílý na řadě 6, černý na řadě 1)
+                boolean isStartingSquare = (color == Chesswindowpanel.WHITE && pceRow == 6)
+                        || (color != Chesswindowpanel.WHITE && pceRow == 1);
+
+                if (isStartingSquare) {
+                    int doubleStepRow = pceRow + (direction * 2);
+                    int doubleStepIndex = doubleStepRow * 8 + targetCol;
+
+                    // Podmínkou je, že I DRUHÉ políčko musí být prázdné (pěšec nemůže přeskočit figuru)
+                    if (board.getPiece(doubleStepIndex) == null) {
+                        legalMoves.add(new Move(board, this, targetCol, doubleStepRow));
+                    }
+                }
+            }
+        }
+
+        // 3. BRANÍ ŠIKMO (útoky vlevo a vpravo)
+        int[] captureCols = {pceCol - 1, pceCol + 1}; // Oba možné sloupce pro útok
+
+        for (int cCol : captureCols) {
+            // Kontrola, že nevyjdeme ven z šachovnice
+            if (cCol >= 0 && cCol <= 7 && targetRow >= 0 && targetRow <= 7) {
+                int captureIndex = targetRow * 8 + cCol;
+                Piece targetPiece = board.getPiece(captureIndex);
+
+                // Pokud na políčku stojí nějaká figura a má OPAČNOU barvu
+                if (targetPiece != null && targetPiece.color != this.color) {
+                    piecePosition = row * 8 + col;
+                    legalMoves.add(new Move.MajorAttackMove(board, this, piecePosition, targetPiece));
+                }
+
+                // --- 4. EN PASSANT (Braní mimochodem) ---
+                // Minimax potřebuje vědět, jestli soupeř v předchozím tahu pohnul pěšcem o 2 políčka.
+                // K tomu potřebuješ mít v 'board' uložený poslední zahraný tah (např. board.getTransitionMove()).
+                // Pokud to tvůj engine zatím neumí sledovat, doporučuji nechat tuto část zakomentovanou.
+                /*
+                else if (targetPiece == null) {
+                    Move lastMove = board.getLastTransitionMove(); 
+                    if (lastMove != null && lastMove.getMovedPiece() instanceof Pawn) {
+                        Piece lastMovedPawn = lastMove.getMovedPiece();
+                        // Pokud stojí vedle mě a pohnul se o 2 políčka (můžeš kontrolovat i přes lastMovedPawn.twoStepped)
+                        if (lastMovedPawn.pceRow == this.pceRow && lastMovedPawn.pceCol == cCol) {
+                            // Přidej speciální En Passant tah
+                        }
+                    }
+                }
+                 */
+            }
         }
 
         return legalMoves;
-
     }
  }

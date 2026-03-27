@@ -10,6 +10,7 @@ import Chess.BoardUtils;
 import Chess.Chessboard;
 import Chess.Chesswindowpanel;
 import Chess.Move;
+import Chess.Move.MajorMove;
 import Chess.MoveUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,7 @@ public class Rook extends Piece {
     private final static Map<Integer, MoveUtils.Line[]> PRECOMPUTED_CANDIDATES = computeCandidates();
     private final Alliance pieceAlliance = Alliance.WHITE;
 
-     // GUI konstruktor
+    // GUI konstruktor
     public Rook(int color, int col, int row, boolean isGui) {
         super(color, col, row, isGui);
         this.type = Types.ROOK;
@@ -42,8 +43,8 @@ public class Rook extends Piece {
             image = getImage("/Chess/Pieces/piece/b-rook");
         }
     }
-    
-     // ENGINE delegátor, pokud chceš convenience overload
+
+    // ENGINE delegátor, pokud chceš convenience overload
     public Rook(final Alliance alliance, final int piecePosition) {
         this(alliance, piecePosition, false);
     }
@@ -60,7 +61,6 @@ public class Rook extends Piece {
             image = getImage("/Chess/Pieces/piece/b-rook");
         }
     }
-
 
     @Override
     public boolean canMove(int targetCol, int targetRow) {
@@ -103,13 +103,13 @@ public class Rook extends Piece {
         return Collections.unmodifiableMap(candidates);
     }
 
-   @Override
+    @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
 
         List<Move> legalMoves = new ArrayList<>();
 
         int[][] directions = {
-            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+                { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }
         };
 
         for (int[] d : directions) {
@@ -126,14 +126,15 @@ public class Rook extends Piece {
                     break;
                 }
 
-                Piece target = board.getPiece(rows, columns);
+                // Piece target = board.getPiece(columns, rows);
+                int targetIndex = rows * 8 + columns;
+                Piece target = board.getPiece(targetIndex);
 
                 if (target == null) {
-                    legalMoves.add(new Move(board, this, columns, rows));
+                    legalMoves.add(new MajorMove(board, this, rows * 8 + columns));
                 } else {
-
                     if (target.color != this.color) {
-                        legalMoves.add(new Move(board, this, columns, rows));
+                        legalMoves.add(new Move.MajorAttackMove(board, this, rows * 8 + columns, target));
                     }
 
                     break;
@@ -149,15 +150,13 @@ public class Rook extends Piece {
     }
 
     public Piece getMovedPiece(Move move) {
-        return new Rook(this.pieceAlliance, move.getDestinationCoordinate(), false); 
+        return new Rook(this.pieceAlliance, move.getDestinationCoordinate(), false);
     }
-
 
     private static boolean isColumnExclusion(final int position,
             final int offset) {
         return (BoardUtils.FIRST_COLUMN.get(position) && (offset == -1))
                 || (BoardUtils.EIGHTH_COLUMN.get(position) && (offset == 1));
     }
-
 
 }

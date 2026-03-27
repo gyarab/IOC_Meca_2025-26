@@ -84,9 +84,9 @@ public class Queen extends Piece {
         return new Queen(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
 
-    @Override
+     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-        
+
         List<Move> legalMoves = new ArrayList<>();
 
         int[][] directions = {
@@ -96,26 +96,28 @@ public class Queen extends Piece {
 
         for (int[] d : directions) {
 
-            int col = pceCol;
-            int row = pceRow;
+            int columns = pceCol;
+            int rows = pceRow;
 
             while (true) {
 
-                col += d[0];
-                row += d[1];
+                columns += d[0];
+                rows += d[1];
 
-                if (col < 0 || col > 7 || row < 0 || row > 7) {
+                if (columns < 0 || columns > 7 || rows < 0 || rows > 7) {
                     break;
                 }
 
-                Piece target = board.getPiece(row, col);
+//                Piece target = board.getPiece(columns, rows);
+                int targetIndex = rows * 8 + columns;
+                Piece target = board.getPiece(targetIndex);
 
                 if (target == null) {
-                    legalMoves.add(new Move(board, this, col, row));
+                    legalMoves.add(new Move.MajorMove(board, this, targetIndex));
                 } else {
 
                     if (target.color != this.color) {
-                        legalMoves.add(new Move(board, this, col, row));
+                       legalMoves.add(new Move.MajorAttackMove(board, this, targetIndex, target));
                     }
 
                     break;
