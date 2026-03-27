@@ -56,55 +56,53 @@ public class Pawn extends Piece{
     }
    
     @Override
-    public boolean canMove(int targetCol,int targetRow){
-    
-        if(isWithinBoard(targetCol, targetRow) && isSameSquare(targetCol, targetRow) == false){
+    public boolean canMove(int targetCol, int targetRow) {
+
+        if (isWithinBoard(targetCol, targetRow) && isSameSquare(targetCol, targetRow) == false) {
             //Define the move value based on its color
             int moveValue;
-            if(hasMoved == false){
-            if(color == Chesswindowpanel.WHITE){
-                moveValue = -1; //for white pawn(up)
-            }
-            else{
-                moveValue = 1; //for black pawn(down)
-            }
-        //Check the hitting piece
-        hittingP = getHittingP(targetCol, targetRow);
-        
-        //1 square movement
-        if(targetCol == pceCol && targetRow == pceRow + moveValue && hittingP == null){
-            return true;
-        }
-        //2 square movement
-        if(!hasMoved && targetCol == pceCol && targetRow == pceRow + moveValue*2 && hittingP == null){
-                if (pieceIsOnStraightLine(targetCol, targetRow) == false) {
+            if (hasMoved == false) {
+                if (color == Chesswindowpanel.WHITE) {
+                    moveValue = -1; //for white pawn(up)
+                } else {
+                    moveValue = 1; //for black pawn(down)
+                }
+                //Check the hitting piece
+                hittingP = getHittingP(targetCol, targetRow);
+
+                //1 square movement
+                if (targetCol == pceCol && targetRow == pceRow + moveValue && hittingP == null) {
                     return true;
                 }
-        }
-        //1 square movement when the pawn has moved
-        if(targetCol == pceCol && row == pceRow + moveValue && hittingP == null){
-            return true;
-        }
-        
-        
-        //Diagonal movement & Capture(if a piece is on a square diagonally in front of it)
-        if(Math.abs(targetCol-pceCol) == 1 
-                && targetRow == pceRow + moveValue && hittingP != null && hittingP.color != color){
-            return true;//col difference needs to be 1 and targetRow needs to be pceRow+1 or pceRow-1
-        }
-        //En Passant
-        if(Math.abs(targetCol-pceCol) == 1 && targetRow == pceRow + moveValue){
-            for(Piece pieces:Chesswindowpanel.simPieces){
-                if(pieces.col == targetCol && pieces.row == pceRow && pieces.twoStepped == true){
-                    hittingP = pieces; //If there is a piece that it's col is equal to the targetCol
-                    return true; 
+                //2 square movement
+                if (!hasMoved && targetCol == pceCol && targetRow == pceRow + moveValue * 2 && hittingP == null) {
+                    if (pieceIsOnStraightLine(targetCol, targetRow) == false) {
+                        return true;
+                    }
+                }
+                //1 square movement when the pawn has moved
+                if (targetCol == pceCol && row == pceRow + moveValue && hittingP == null) {
+                    return true;
+                }
+
+                //Diagonal movement & Capture(if a piece is on a square diagonally in front of it)
+                if (Math.abs(targetCol - pceCol) == 1
+                        && targetRow == pceRow + moveValue && hittingP != null && hittingP.color != color) {
+                    return true;//col difference needs to be 1 and targetRow needs to be pceRow+1 or pceRow-1
+                }
+                //En Passant
+                if (Math.abs(targetCol - pceCol) == 1 && targetRow == pceRow + moveValue) {
+                    for (Piece pieces : Chesswindowpanel.simPieces) {
+                        if (pieces.col == targetCol && pieces.row == pceRow && pieces.twoStepped == true) {
+                            hittingP = pieces; //If there is a piece that it's col is equal to the targetCol
+                            return true;
+                        }
+                    }
                 }
             }
         }
-        }   
-        }
         return false;
-}    
+    }   
 
     @Override
     public int locationBonus() {
@@ -116,7 +114,7 @@ public class Pawn extends Piece{
         return new Pawn(this.pieceAlliance,move.getDestinationCoordinate(),false);
     }
     
-     @Override
+    @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
 
         List<Move> legalMoves = new ArrayList<>();
@@ -164,8 +162,7 @@ public class Pawn extends Piece{
 
                 // Pokud na políčku stojí nějaká figura a má OPAČNOU barvu
                 if (targetPiece != null && targetPiece.color != this.color) {
-                    piecePosition = row * 8 + col;
-                    legalMoves.add(new Move.MajorAttackMove(board, this, piecePosition, targetPiece));
+                    legalMoves.add(new Move.MajorAttackMove(board, this, captureIndex, targetPiece));
                 }
 
                 // --- 4. EN PASSANT (Braní mimochodem) ---
