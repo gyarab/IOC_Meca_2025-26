@@ -172,7 +172,8 @@ public class King extends Piece {
 
     @Override
     public Collection<Move> calculateLegalMoves(Chessboard board) {
-         List<Move> legalMoves = new ArrayList<>();
+
+        List<Move> legalMoves = new ArrayList<>();
 
         for (int r = -1; r <= 1; r++) {
             for (int c = -1; c <= 1; c++) {
@@ -181,21 +182,22 @@ public class King extends Piece {
                     continue;
                 }
 
-                int col = pceCol + c;
-                int row = pceRow + r;
+                int columns = pceCol + c;
+                int rows = pceRow + r;
 
-                if (col < 0 || col > 7 || row < 0 || row > 7) {
+                if (columns < 0 || columns > 7 || rows < 0 || rows > 7) {
                     continue;
                 }
 
-                Piece target = board.getPiece(row, col);
+                Piece target = board.getPiece(columns, rows);
 
                 if (target == null || target.color != this.color) {
-                    legalMoves.add(new Move(board, this, col, row));
+                    legalMoves.add(new Move(board, this, columns, rows));
                 }
             }
         }
 
         return legalMoves;
     }
+}
 }
