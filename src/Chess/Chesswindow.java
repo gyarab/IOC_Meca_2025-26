@@ -55,7 +55,7 @@ public class Chesswindow{
 
     private boolean pressed;
 
-    private void button() {
+    private void createButton() {
         javax.swing.JButton onePlayer = new javax.swing.JButton("One player");
         onePlayer.setBounds(400, 200, 50, 50);
         onePlayer.setFont(new Font("Book Antiqua", Font.BOLD, 20));
