@@ -144,11 +144,13 @@ public class Rook extends Piece {
 
         return legalMoves;
     }
-
+    
+    @Override
     public int locationBonus() {
         return this.pieceAlliance.rookBonus(this.piecePosition);
     }
 
+    @Override
     public Piece getMovedPiece(Move move) {
         return new Rook(this.pieceAlliance, move.getDestinationCoordinate(), false);
     }
