@@ -1,31 +1,32 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package Chess;
+
 /**
- *
- * @author mecova
+ * Reprezentuje stav pokusu o provedení tahu na šachovnici.
+ * Používá se k ověření, zda byl tah legální a zda nezanechal krále v šachu.
  */
 public enum MoveStatus {
        
-          DONE { //move has done
-            public boolean isDone() {
-                return true;
-            }
-        },
-        ILLEGAL_MOVE {  //not legal move
-            public boolean isDone() {
-                return false;
-            }
-        },
-        LEAVES_PLAYER_IN_CHECK { //after move the king is in check  
-            public boolean isDone() {
-                return false;
-            }
-        };
-        public abstract boolean isDone();
-    }
+    DONE {
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+    },
+    ILLEGAL_MOVE {
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+    },
+    LEAVES_PLAYER_IN_CHECK {
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+    };
 
-
+    /**
+     * @return true, pokud je tah platný a byl úspěšně proveden.
+     */
+    public abstract boolean isDone();
+}

@@ -47,6 +47,7 @@ public final class Chesswindowpanel extends JPanel implements Runnable {
     Chessboard board = Chessboard.createStandardBoard();
     Mouse mouse = new Mouse();
     Move bestMove;
+    MiniMax ai = new MiniMax(board, 1);
 
     // Pieces
     public static ArrayList<Piece> pieces = new ArrayList<>();
