@@ -200,4 +200,4 @@ public class King extends Piece {
         return legalMoves;
     }
 }
-}
+
