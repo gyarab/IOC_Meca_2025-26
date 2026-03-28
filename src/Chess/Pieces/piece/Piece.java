@@ -371,9 +371,11 @@ public abstract class Piece {
         }
     }
 
-     @Override
+       @Override
     public String toString() {
-        //TODO dodelat
+        if(type == null){
+            return null;
+        }
         return type.toString();
     }
 
