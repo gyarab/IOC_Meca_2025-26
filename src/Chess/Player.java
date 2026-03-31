@@ -63,8 +63,13 @@ public abstract class Player {
         return this.playerKing.isQueenSideCastleCapable();
     }
 
-    public King getPlayerKing() {
-        return this.playerKing;
+     public King getPlayerKing() {
+
+        if (playerKing != null) {
+
+            return this.playerKing;
+        }
+        return null;
     }
 
     private boolean isTrapped() {
