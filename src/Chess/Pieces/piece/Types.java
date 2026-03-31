@@ -35,7 +35,7 @@ public enum Types {
        return this.types;
    }
    
-   private Types(final int value, final String pieceName){
+   Types(final int value, final String pieceName){
        this.value = value;
        this.pieceName = pieceName;
    }   
