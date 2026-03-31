@@ -267,28 +267,44 @@ public final class Chessboard {
     }
 
        private static Chessboard createStandardBoardImpl() {
-        Builder builder = new Chessboard.Builder();
+        final Builder builder = new Chessboard.Builder();
 
-        builder.setMoveMaker(Alliance.WHITE);
+        //black pieces
+        builder.setPiece(new Rook(Alliance.BLACK, 0, false));
+        builder.setPiece(new Knight(Alliance.BLACK, 1, false));
+        builder.setPiece(new Bishop(Alliance.BLACK, 2, false));
+        builder.setPiece(new Queen(Alliance.BLACK, 3, false));
+        builder.setPiece(new King(Alliance.BLACK, 4, false));
+        builder.setPiece(new Bishop(Alliance.BLACK, 5, false));
+        builder.setPiece(new Knight(Alliance.BLACK, 6, false));
+        builder.setPiece(new Rook(Alliance.BLACK, 7, false));
 
-        for (Piece p : Chesswindowpanel.pieces) {
-            builder.setPiece(p); // boardPieces[piecePosition] = p
+           for (int i = 8; i < 16; i++) {
+            builder.setPiece(new Pawn(Alliance.BLACK, i, false));
         }
 
-        Chessboard board = builder.build();
+        // white pieces
+        for (int i = 48; i < 56; i++) {
+            builder.setPiece(new Pawn(Alliance.WHITE, i, false));
+        }
 
-        board.pieces = new ArrayList<>(Chesswindowpanel.pieces);
+        builder.setPiece(new Rook(Alliance.WHITE, 56, false));
+        builder.setPiece(new Knight(Alliance.WHITE, 57, false));
+        builder.setPiece(new Bishop(Alliance.WHITE, 58, false));
+        builder.setPiece(new Queen(Alliance.WHITE, 59, false));
+        builder.setPiece(new King(Alliance.WHITE, 60, false));
+        builder.setPiece(new Bishop(Alliance.WHITE, 61, false));
+        builder.setPiece(new Knight(Alliance.WHITE, 62, false));
+        builder.setPiece(new Rook(Alliance.WHITE, 63, false));
 
-        board.rebuildBoard();
 
-        board.initializeEvaluation();
+        //white to move
+        builder.setMoveMaker(Alliance.WHITE);
 
-        System.out.println("Pieces on board: " + board.pieces.size());
-        System.out.println("White pieces: " + board.whitePieceCoordinates.length);
-        System.out.println("Black pieces: " + board.blackPieceCoordinates.length);
 
-        return board;
-    }
+        return  builder.build();
+        
+        }
 
     public Collection<Move> getAllLegalMoves() {
         return Stream.concat(this.whiteplayer.getLegalMoves().stream(),
@@ -302,7 +318,8 @@ public final class Chessboard {
         for (final int piece_index : pieces) {
             legalsMove.addAll(boardConfig[piece_index].calculateLegalMoves(this));
         }
-        System.out.println("Legals move are these:" + legalsMove);
+//        System.out.println("Legals move are these:" + legalsMove); //vypisuje prazdne tahy
+
         return legalsMove;
     }
 
@@ -332,8 +349,7 @@ public final class Chessboard {
         int count = 0;
         for (int idx = 0; idx < boardConfig.length; idx++) {
             final Piece piece = boardConfig[idx];
-            if (piece != null && piece.getPieceAllegiance() == alliance) { // I need to create this method in class
-                                                                           // Pieces
+            if (piece != null && piece.getPieceAllegiance() == alliance) { 
                 result[count++] = idx;
             }
         }
@@ -349,11 +365,7 @@ public final class Chessboard {
             }
         }
         // throw new RuntimeException("No king found for player!");
-        return null; // TODO : more work here
-    }
-
-    static int movePiece(Move bestMove) {
-        return 0; // TODO: more work here
+        return null;
     }
 
     public static class Builder {
