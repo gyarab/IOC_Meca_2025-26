@@ -17,9 +17,9 @@ import java.util.List;
  *
  * @author Admin
  */
-public class Pawn extends Piece{
+public class Pawn extends Piece {
     
-    public boolean hasMoved = false;
+    public boolean hasMoved = hasmoved;
    
     
        // GUI konstruktor
@@ -29,6 +29,7 @@ public class Pawn extends Piece{
         this.piecePosition = row * 8 + col;
         this.pceCol = col;
         this.pceRow = row;
+        this.hasMoved = hasmoved;
 
         if(color == Chesswindowpanel.WHITE){
             image = getImage("/Chess/Pieces/piece/w-pawn");
