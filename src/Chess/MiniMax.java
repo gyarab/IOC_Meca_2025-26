@@ -41,8 +41,79 @@ public final class MiniMax implements MoveStrategy {
         return this.boardsEvaluated;
     }
 
+
+    public Move execute(Chessboard board) {
+        Move bestMove = MoveFactory.getNullMove();
+        int highestSeenValue = Integer.MIN_VALUE;
+        int lowestSeenValue = Integer.MAX_VALUE;
+        int currentValue;
+
+        System.out.println("AI přemýšlí s hloubkou: " + this.searchDepth);
+
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+            
+            if (moveTransition.getMoveStatus().isDone()) {
+                // Pokud hraje bílý, chce MAXIMALIZOVAT, pokud černý, MINIMALIZOVAT
+                currentValue = board.currentPlayer().getAlliance().isWhite() ?
+                        min(moveTransition.getToBoard(), this.searchDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE) :
+                        max(moveTransition.getToBoard(), this.searchDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+                if (board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue) {
+                    highestSeenValue = currentValue;
+                    bestMove = move;
+                } else if (board.currentPlayer().getAlliance().isBlack() && currentValue <= lowestSeenValue) {
+                    lowestSeenValue = currentValue;
+                    bestMove = move;
+                }
+            }
+        }
+
+        return bestMove;
+    }
+
+    // REKURZIVNÍ ČÁST - MAX
+    public int max(final Chessboard board, final int depth, int alpha, int beta) {
+        if (depth == 0 || isEndGameScenario(board)) {
+            return this.boardEvaluator.evaluate(board, depth);
+        }
+
+        int highestSeenValue = Integer.MIN_VALUE;
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+            if (moveTransition.getMoveStatus().isDone()) {
+                highestSeenValue = Math.max(highestSeenValue, min(moveTransition.getToBoard(), depth - 1, alpha, beta));
+                alpha = Math.max(alpha, highestSeenValue);
+                if (beta <= alpha) {
+                    break; // Alfa-beta ořezání
+                }
+            }
+        }
+        return highestSeenValue;
+    }
+
+    // REKURZIVNÍ ČÁST - MIN
+    public int min(final Chessboard board, final int depth, int alpha, int beta) {
+        if (depth == 0 || isEndGameScenario(board)) {
+            return this.boardEvaluator.evaluate(board, depth);
+        }
+
+        int lowestSeenValue = Integer.MAX_VALUE;
+        for (final Move move : board.currentPlayer().getLegalMoves()) {
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+            if (moveTransition.getMoveStatus().isDone()) {
+                lowestSeenValue = Math.min(lowestSeenValue, max(moveTransition.getToBoard(), depth - 1, alpha, beta));
+                beta = Math.min(beta, lowestSeenValue);
+                if (beta <= alpha) {
+                    break; // Alfa-beta ořezání
+                }
+            }
+        }
+        return lowestSeenValue;
+    }
+
     @Override
-    public Move execute(final Chessboard board) {
+    public Move execute(final Chessboard board, int searchDepth) {
         final long startTime = System.currentTimeMillis();
         Move bestMove = MoveFactory.getNullMove();
 
@@ -66,8 +137,8 @@ public final class MiniMax implements MoveStrategy {
 
                 // Pokud hraje bílý, minimalizujeme následný tah černého a naopak
                 currentValue = board.currentPlayer().getAlliance().isWhite()
-                        ? min(moveTransition.getToBoard(), this.searchDepth - 1)
-                        : max(moveTransition.getToBoard(), this.searchDepth - 1);
+                        ? min(moveTransition.getToBoard(), this.searchDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE)
+                        : max(moveTransition.getToBoard(), this.searchDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
                 System.out.println("\t" + toString() + " analyzing move (" + moveCounter + "/" + numMoves + ") " + move
                         + " scores" + currentValue + " " + this.freqTable[this.freqTableIndex]);
@@ -87,7 +158,8 @@ public final class MiniMax implements MoveStrategy {
 
         final long executionTime = System.currentTimeMillis() - startTime;
         System.out.printf("%s SELECTS %s [#boards = %d time taken = %d ms, rate = %.1f\n", board.currentPlayer(),
-                bestMove, this.boardsEvaluated, executionTime, (1000 * ((double) this.boardsEvaluated / executionTime)));
+                bestMove, this.boardsEvaluated, executionTime,
+                (1000 * ((double) this.boardsEvaluated / executionTime)));
 
         long total = 0;
         for (final FreqTableRow row : this.freqTable) {
@@ -115,7 +187,7 @@ public final class MiniMax implements MoveStrategy {
         for (final Move move : board.currentPlayer().getLegalMoves()) {
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
             if (moveTransition.getMoveStatus().isDone()) {
-                final int currentValue = max(moveTransition.getToBoard(), depth - 1); 
+                final int currentValue = max(moveTransition.getToBoard(), depth - 1);
                 if (currentValue <= lowestSeenValue) {
                     lowestSeenValue = currentValue;
                 }
@@ -149,6 +221,28 @@ public final class MiniMax implements MoveStrategy {
         return highestSeenValue;
     }
 
+    public int alphaBeta(Chessboard board, int depth, int alpha, int beta) {
+        if (depth == 0 || isEndGameScenario(board)) {
+            return boardEvaluator.evaluate(board, depth);
+        }
+
+        for (Move move : board.currentPlayer().getLegalMoves()) {
+            MoveTransition transition = board.currentPlayer().makeMove(move);
+            if (transition.getMoveStatus().isDone()) {
+                // Negamax volání: otočíme skóre i hranice alfa/beta
+                int score = -alphaBeta(transition.getToBoard(), depth - 1, -beta, -alpha);
+
+                if (score >= beta) {
+                    return beta; // Beta-cut: tah je pro soupeře příliš dobrý
+                }
+                if (score > alpha) {
+                    alpha = score; // Aktualizace nejlepšího nalezeného tahu
+                }
+            }
+        }
+        return alpha;
+    }
+
     private static boolean isEndGameScenario(final Chessboard board) {
         return board.currentPlayer().isInCheckMate() || board.currentPlayer().isInStaleMate();
     }
@@ -169,7 +263,7 @@ public final class MiniMax implements MoveStrategy {
 
         void increment() {
             this.count.incrementAndGet();
-        }   
+        }
 
         @Override
         public String toString() {
