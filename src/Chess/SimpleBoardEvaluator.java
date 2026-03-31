@@ -19,52 +19,46 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
     private static final int CHECK_BONUS = 45;
     private static final int CASTLE_BONUS = 35;
     private static final int CASTLING_RIGHTS_BONUS = 15;
-    private static final int MOBILITY_MULTIPLIER = 2; //bonus for mobility of the piece
+    private static final int MOBILITY_MULTIPLIER = 2; // bonus for mobility of the piece
     private static final int ATTACK_MULTIPLIER = 2;
     private static final int TWO_BISHOP_BONUS = 25;
-    private static final int CRAMPING_MULTIPLIER = 1; //negative specific bonus for lack of space  
+    private static final int CRAMPING_MULTIPLIER = 1; // negative specific bonus for lack of space
     private static final int NO_BONUS = 0;
 
-    private static final Map<GamePhase, List<ScalarFeature>> PHASE_FACTORS
-            = Map.of(
-                    GamePhase.OPENING,
-                    List.of(
-                            Feature.MATERIAL,
-                            Feature.CHECK_AND_MATE,
-                            Feature.MOBILITY,
-                            Feature.PAWN_STRUCTURE,
-                            Feature.CASTLE
-                    ),
-                    GamePhase.MIDDLEGAME, List.of(
-                            Feature.MATERIAL,
-                            Feature.CHECK_AND_MATE,
-                            Feature.MOBILITY,
-                            Feature.ATTACKS,
-                            Feature.KING_SAFETY
-                    ),
-                    GamePhase.ENDGAME, List.of(
-                            Feature.MATERIAL,
-                            Feature.CHECK_AND_MATE,
-                            Feature.KING_SAFETY,
-                            Feature.CRAMPING,
-                            Feature.PIECE_SAFETY
-                    ),
-                    GamePhase.DEBUG, List.of(
-                            Feature.MOBILITY,
-                            Feature.CRAMPING,
-                            Feature.CHECK_AND_MATE,
-                            Feature.ATTACKS,
-                            Feature.CASTLE,
-                            Feature.MATERIAL,
-                            Feature.PAWN_STRUCTURE,
-                            Feature.KING_SAFETY
-                    )
-            );
+    private static final Map<GamePhase, List<ScalarFeature>> PHASE_FACTORS = Map.of(
+            GamePhase.OPENING,
+            List.of(
+                    Feature.MATERIAL,
+                    Feature.CHECK_AND_MATE,
+                    Feature.MOBILITY,
+                    Feature.PAWN_STRUCTURE,
+                    Feature.CASTLE),
+            GamePhase.MIDDLEGAME, List.of(
+                    Feature.MATERIAL,
+                    Feature.CHECK_AND_MATE,
+                    Feature.MOBILITY,
+                    Feature.ATTACKS,
+                    Feature.KING_SAFETY),
+            GamePhase.ENDGAME, List.of(
+                    Feature.MATERIAL,
+                    Feature.CHECK_AND_MATE,
+                    Feature.KING_SAFETY,
+                    Feature.CRAMPING,
+                    Feature.PIECE_SAFETY),
+            GamePhase.DEBUG, List.of(
+                    Feature.MOBILITY,
+                    Feature.CRAMPING,
+                    Feature.CHECK_AND_MATE,
+                    Feature.ATTACKS,
+                    Feature.CASTLE,
+                    Feature.MATERIAL,
+                    Feature.PAWN_STRUCTURE,
+                    Feature.KING_SAFETY));
 
     private static final SimpleBoardEvaluator INSTANCE = new SimpleBoardEvaluator();
 
     SimpleBoardEvaluator() {
-
+        System.out.println("Bonus za útok: " + ATTACK_MULTIPLIER);
     }
 
     public static SimpleBoardEvaluator get() {
@@ -109,7 +103,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
     private static int cramping(final Player player) {
         final int own = player.getLegalMoves().size();
         final int opp = player.getOpponent().getLegalMoves().size();
-        if (opp == 0) { //oponent cannot make any good move
+        if (opp == 0) { // oponent cannot make any good move
             return 100 * CRAMPING_MULTIPLIER;
         }
         final float ratio = (float) own / opp;
@@ -140,10 +134,10 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
     private static int attacks(final Player player) {
         int score = 0;
         for (final Move move : player.getLegalMoves()) {
-            if (move.isAttack()) { //I need to create a method isAttack() in class Move (package Chess)
-                final Piece mover = move.getMovedPiece(); //I need to create this method in class Chess.Move
-                final Piece victim = move.getAttackedPiece(); //I need to create this method in class Chess.Move
-                if (mover.getPieceValue() <= victim.getPieceValue()) { //I need to create this method in two classes: Move and Piece
+            if (move.isAttack()) {
+                final Piece mover = move.getMovedPiece();
+                final Piece victim = move.getAttackedPiece();
+                if (mover.getPieceValue() <= victim.getPieceValue()) {
                     score += 2;
                 }
             }
@@ -158,7 +152,11 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         int pawnCount = 0;
         for (final int index : player.getActivePieces()) {
             final Piece p = player.getBoard().getPiece(index, index);
-            score += p.getPieceValue() + p.locationBonus(); //I need to create this methods
+            score += p.getPieceValue() + p.locationBonus();
+            if (p != null) {
+                System.out.println("Material score for piece at index " + index + ": " + p.getPieceValue()
+                        + " + location bonus: " + p.locationBonus());
+            }
             switch (p.getPieceType()) {
                 case BISHOP:
                     bishopCount++;
@@ -181,7 +179,8 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
     }
 
     private static int kingSafety(final Player player) {
-        final int tropism = KingSafetyAnalyzer.get().calculateKingTropism(player); // The distance of the attacking pieces from the opponent's king
+        final int tropism = KingSafetyAnalyzer.get().calculateKingTropism(player); // The distance of the attacking
+                                                                                   // pieces from the opponent's king
         final int safety = KingSafetyAnalyzer.get().gptKingSafety(player);
         return tropism + safety;
     }
@@ -190,20 +189,26 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         int penalty = 0;
         final Chessboard board = player.getBoard();
         for (final int pos : player.getActivePieces()) {
-            final Piece piece = board.getPiece(pos,pos);
-            //Find cheapest attacker
+            final Piece piece = board.getPiece(pos, pos);
+            // Find cheapest attacker
             int cheapestAttacker = Integer.MAX_VALUE;
             boolean isAttacked = false;
             for (final Move move : player.getOpponent().getLegalMoves()) {
-                if (move.getDestinationCoordinate() == pos && move.isAttack()) { //I need to create this two methods in class Move in package Chess
+                if (move.getDestinationCoordinate() == pos && move.isAttack()) { // I need to create this two methods in
+                                                                                 // class Move in package Chess
                     isAttacked = true;
-                    cheapestAttacker = Math.min(cheapestAttacker, move.getMovedPiece().getPieceValue()); //I need to create this method in class Move in package Chess
+                    cheapestAttacker = Math.min(cheapestAttacker, move.getMovedPiece().getPieceValue()); // I need to
+                                                                                                         // create this
+                                                                                                         // method in
+                                                                                                         // class Move
+                                                                                                         // in package
+                                                                                                         // Chess
                 }
             }
             if (!isAttacked) {
-                continue; // Piece is safe 
+                continue; // Piece is safe
             }
-            //Count defenders and find cheapest defender
+            // Count defenders and find cheapest defender
             int defenders = 0;
             int cheapestDefender = Integer.MAX_VALUE;
             for (Move move : player.getLegalMoves()) {
@@ -214,7 +219,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
                 }
             }
 
-            //Apply penalty based on exchange outcome
+            // Apply penalty based on exchange outcome
             if (defenders == 0) {
                 // Hanging piece - full penalty
                 penalty += piece.getPieceValue(); // I need to create this method in class Pieces
@@ -261,7 +266,7 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
         OPENING,
         MIDDLEGAME,
         ENDGAME,
-        DEBUG //game analysis
+        DEBUG // game analysis
     }
 
     @FunctionalInterface
@@ -284,48 +289,58 @@ public final class SimpleBoardEvaluator implements BoardEvaluator {
                     final int d) {
                 return cramping(p);
             }
-        }, CHECK_AND_MATE {
+        },
+        CHECK_AND_MATE {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return check_or_checkmate(p, d);
             }
-        }, ATTACKS {
+        },
+        ATTACKS {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return attacks(p);
             }
-        }, CASTLE {
+        },
+        CASTLE {
             @Override
             public int apply(final Player p,
                     final int d) {
-                return castle(p);
+                if (p != null) {
+                    return castle(p);
+                }
+                return 0;
             }
-        }, MATERIAL {
+        },
+        MATERIAL {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return material(p);
             }
-        }, PAWN_STRUCTURE {
+        },
+        PAWN_STRUCTURE {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return pawnStructure(p);
             }
-        }, KING_SAFETY {
+        },
+        KING_SAFETY {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return kingSafety(p);
             }
-        }, PIECE_SAFETY {
+        },
+        PIECE_SAFETY {
             @Override
             public int apply(final Player p,
                     final int d) {
                 return pieceSafety(p);
             }
         };
-    }    
+    }
 }
