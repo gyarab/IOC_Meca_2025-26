@@ -90,17 +90,17 @@ public class Knight extends Piece {
 
         for (int[] m : moves) {
 
-            int col = pceCol + m[0];
-            int row = pceRow + m[1];
+            int columns = pceCol + m[0];
+            int rows = pceRow + m[1];
 
-            if (col < 0 || col > 7 || row < 0 || row > 7) {
+            if (columns < 0 || columns > 7 || rows < 0 || rows > 7) {
                 continue;
             }
 
-            Piece target = board.getPiece(row, col);
+            Piece target = board.getPiece(rows, columns);
 
             if (target == null || target.color != this.color) {
-                legalMoves.add(new Move(board, this, col, row));
+                legalMoves.add(new Move(board, this, columns, rows));
             }
         }
 
