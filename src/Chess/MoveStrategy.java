@@ -8,10 +8,12 @@ package Chess;
  * @author mecova
  */
 public interface MoveStrategy {
+
+
+    Move execute(Chessboard board, int searchDepth);
     
+        
     long getNumBoardsEvaluated();
-    
-    Move execute(Chessboard board);    
     
     /**
      *
