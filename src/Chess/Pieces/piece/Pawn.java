@@ -105,6 +105,10 @@ public class Pawn extends Piece {
         return false;
     }   
 
+    public boolean isFirstMove() {
+        return !hasMoved;
+    }
+
     @Override
     public int locationBonus() {
          return this.pieceAlliance.pawnBonus(this.piecePosition);
@@ -187,4 +191,5 @@ public class Pawn extends Piece {
 
         return legalMoves;
     }
- }
+}
+
