@@ -29,4 +29,4 @@ public enum MoveStatus {
      * @return true, pokud je tah platný a byl úspěšně proveden.
      */
     public abstract boolean isDone();
-}
+}   
