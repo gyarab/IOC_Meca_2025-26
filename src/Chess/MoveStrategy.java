@@ -12,7 +12,6 @@ public interface MoveStrategy {
 
     Move execute(Chessboard board, int searchDepth);
     
-        
     long getNumBoardsEvaluated();
     
     /**
